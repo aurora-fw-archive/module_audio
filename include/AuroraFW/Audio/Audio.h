@@ -20,13 +20,16 @@
 #define AURORAFW_AUDIO_AUDIO_H
 
 #include <AuroraFW/Global.h>
-
-#include <AL/al.h>
-#include <AL/alc.h>
+#include <AuroraFW/Audio/AudioBackend.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
-
+		class AFW_EXPORT AudioFile {
+		public:
+			AudioFile();
+			AudioFile(const char* );
+			AudioFile(AudioFile& );
+		};
 	}
 }
 

@@ -16,13 +16,38 @@
 ** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
 ****************************************************************************/
 
-#include <AuroraFW/Audio/Audio.h>
+#ifndef AURORAFW_AUDIO_AUDIOBACKEND_H
+#define AURORAFW_AUDIO_AUDIOBACKEND_H
+
+// AuroraFW
+#include <AuroraFW/Global.h>
+
+// OpenAL
+#include <AL/alc.h>
+#include <AL/al.h>
+
+// STD
+#include <exception>
 
 namespace AuroraFW {
 	namespace AudioManager {
-		AudioFile::AudioFile()
+		class AudioDeviceNotFoundException: public std::exception
 		{
-			AudioBackend ab = AudioBackend::getInstance();
-		}
+		public:
+			AudioDeviceNotFoundException() {}
+			virtual const char* what() const throw();
+		};
+
+		class AFW_EXPORT AudioBackend {
+		private:
+			static AudioBackend *_instance;
+			ALCdevice *_device;
+			AudioBackend();
+		public:
+			static AudioBackend& getInstance();
+			~AudioBackend();
+		};
 	}
 }
+
+#endif	// AURORAFW_AUDIO_AUDIOBACKEND_H

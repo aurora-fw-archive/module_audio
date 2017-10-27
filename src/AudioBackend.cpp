@@ -16,13 +16,39 @@
 ** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
 ****************************************************************************/
 
-#include <AuroraFW/Audio/Audio.h>
+#include <AuroraFW/Audio/AudioBackend.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
-		AudioFile::AudioFile()
+		const char* AudioDeviceNotFoundException::what() const throw()
 		{
-			AudioBackend ab = AudioBackend::getInstance();
+			return "OpenAL couldn't find an audio device. Make sure you have a sound card and that is compatible with OpenAL.";
+		}
+
+		AudioBackend::AudioBackend()
+		{
+			// Starts OpenAL
+			alGetError();	// This resets the error buffer
+			_device = alcOpenDevice(NULL);
+			if(!_device) {
+				throw AudioDeviceNotFoundException();
+			}
+		}
+
+		AudioBackend::~AudioBackend()
+		{
+			// DEBUG: Commented for now to prove OpenAL is working
+			//alcCloseDevice(_device);
+		}
+
+		AudioBackend* AudioBackend::_instance = nullptr;
+
+		AudioBackend& AudioBackend::getInstance()
+		{
+			if(_instance == nullptr)
+				_instance = new AudioBackend();
+
+			return *_instance;
 		}
 	}
 }
