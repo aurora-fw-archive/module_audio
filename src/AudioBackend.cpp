@@ -20,25 +20,39 @@
 
 namespace AuroraFW {
 	namespace AudioManager {
+		AudioDeviceNotFoundException::AudioDeviceNotFoundException(const char *deviceName)
+			: _deviceName(deviceName
+				? std::string("The device \"" + std::string(deviceName) + "\" does not exist!")
+				: std::string("OpenAL couldn't find an audio device. "
+				"Make sure you have a sound card and that is compatible with OpenAL.")) {}
+
 		const char* AudioDeviceNotFoundException::what() const throw()
 		{
-			return "OpenAL couldn't find an audio device. Make sure you have a sound card and that is compatible with OpenAL.";
+			return _deviceName.c_str();
 		}
 
 		AudioBackend::AudioBackend()
 		{
 			// Starts OpenAL
 			alGetError();	// This resets the error buffer
-			_device = alcOpenDevice(NULL);
-			if(!_device) {
-				throw AudioDeviceNotFoundException();
-			}
+			setDevice(NULL);
 		}
 
 		AudioBackend::~AudioBackend()
 		{
 			// DEBUG: Commented for now to prove OpenAL is working
-			//alcCloseDevice(_device);
+			alcCloseDevice(_device);
+		}
+
+		void AudioBackend::setDevice(const char *deviceName)
+		{
+			if(_device)
+				alcCloseDevice(_device);
+			
+			_device = alcOpenDevice((ALCchar*)deviceName);
+
+			if(!_device)
+				throw AudioDeviceNotFoundException(deviceName);
 		}
 
 		AudioBackend* AudioBackend::_instance = nullptr;
@@ -49,6 +63,30 @@ namespace AuroraFW {
 				_instance = new AudioBackend();
 
 			return *_instance;
+		}
+
+		char* AudioBackend::getOutputDevices() const
+		{
+			if(alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE) {
+				if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") == AL_TRUE) {
+					const ALCchar *devices = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+					return (char*)devices;
+				} else {
+					const ALCchar *devices = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+					return (char*)devices;
+				}
+			} else {
+				return "";
+			}
+		}
+
+		char* AudioBackend::getInputDevices() const
+		{
+			if(alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE) {
+				const ALCchar *devices = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
+				return (char*)devices;
+			}
+			return "";
 		}
 	}
 }

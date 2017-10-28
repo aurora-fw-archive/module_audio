@@ -21,6 +21,7 @@
 
 // AuroraFW
 #include <AuroraFW/Global.h>
+#include <AuroraFW/STDL/STL/IOStream.h>
 
 // OpenAL
 #include <AL/alc.h>
@@ -33,8 +34,10 @@ namespace AuroraFW {
 	namespace AudioManager {
 		class AudioDeviceNotFoundException: public std::exception
 		{
+		private:
+			const std::string _deviceName;
 		public:
-			AudioDeviceNotFoundException() {}
+			AudioDeviceNotFoundException(const char *);
 			virtual const char* what() const throw();
 		};
 
@@ -45,6 +48,10 @@ namespace AuroraFW {
 			AudioBackend();
 		public:
 			static AudioBackend& getInstance();
+
+			char* getOutputDevices() const;
+			char* getInputDevices() const;
+			void setDevice(const char *);
 			~AudioBackend();
 		};
 	}
