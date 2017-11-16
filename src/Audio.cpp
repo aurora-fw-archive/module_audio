@@ -20,9 +20,11 @@
 
 namespace AuroraFW {
 	namespace AudioManager {
-		AudioFile::AudioFile()
+		AudioStream::AudioStream() {}
+
+		AudioStream::AudioStream(const char *path)
 		{
-			AudioBackend ab = AudioBackend::getInstance();
+			
 		}
 	}
 }

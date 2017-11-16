@@ -19,16 +19,74 @@
 #ifndef AURORAFW_AUDIO_AUDIO_H
 #define AURORAFW_AUDIO_AUDIO_H
 
+// AuroraFW
 #include <AuroraFW/Global.h>
 #include <AuroraFW/Audio/AudioBackend.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
-		class AFW_EXPORT AudioFile {
-		public:
-			AudioFile();
-			AudioFile(const char* );
-			AudioFile(AudioFile& );
+		enum class AudioFallout {
+			Linear,
+			Exponencial
+		};
+
+		enum class AudioLoopMode {
+			Repeat,
+			PingPong
+		};
+
+		enum class AudioStatus {
+			Play,
+			Pause,
+			Stop
+		};
+
+		struct AFW_EXPORT AudioStream {
+			AudioStream();
+			AudioStream(const char *);
+			AudioStream(AudioStream& );
+
+			void setFile(const char *)
+			
+		private:
+			PaStream paStream;
+		};
+
+		struct AFW_EXPORT AudioSource {
+			AudioSource();
+			AudioSource(float , float , float , AudioStream& );
+			AudioSource(AudioSource& );
+
+			void setPosition(float , float , float );
+			void setMedDistance(float );
+			void setMaxDistance(float );
+
+			void setVolume(float );
+			void setPitch(float );
+
+			void setStream(const AudioStream& );
+			const AudioStream& getStream();
+
+			void setLooping(bool );
+			void setLoopMode(const AudioLoopMode );
+
+			void setPosition(float );
+			float getPosition();
+
+			void play();
+			void pause();
+			void stop();
+
+			bool isPlaying();
+			bool isPaused();
+			bool isStopped();
+
+			void setAudioFalloutType(const AudioFallout );
+
+			AudioFallout falloutType;
+			AudioStatus audioStatus;
+			AudioLoopMode audioLoopMode;
+			AudioStream audioStream;
 		};
 	}
 }

@@ -22,10 +22,10 @@
 // AuroraFW
 #include <AuroraFW/Global.h>
 #include <AuroraFW/STDL/STL/IOStream.h>
+#include <AuroraFW/Core/Debug.h>
 
-// OpenAL
-#include <AL/alc.h>
-#include <AL/al.h>
+// PortAudio
+#include <portaudio.h>
 
 // STD
 #include <exception>
@@ -41,18 +41,30 @@ namespace AuroraFW {
 			virtual const char* what() const throw();
 		};
 
+		class PAErrorException: public std::exception
+		{
+		private:
+			const std::string _paError;
+		public:
+			PAErrorException(const PaError& );
+			virtual const char* what() const throw();
+		};
+
 		class AFW_EXPORT AudioBackend {
 		private:
 			static AudioBackend *_instance;
-			ALCdevice *_device;
-			AudioBackend();
+			AudioBackend(const char * = NULL);
+
+			int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+			void getPAError(const PaError&);
 		public:
+			~AudioBackend();
+
 			static AudioBackend& getInstance();
 
-			char* getOutputDevices() const;
-			char* getInputDevices() const;
+			char* getOutputDevices();
+			char* getInputDevices();
 			void setDevice(const char *);
-			~AudioBackend();
 		};
 	}
 }

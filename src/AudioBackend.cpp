@@ -31,28 +31,46 @@ namespace AuroraFW {
 			return _deviceName.c_str();
 		}
 
-		AudioBackend::AudioBackend()
+		PAErrorException::PAErrorException(const PaError& paError)
+			: _paError(std::string("PortAudio error: " + std::string(Pa_GetErrorText(paError)))) {}
+		
+		const char* PAErrorException::what() const throw()
 		{
-			// Starts OpenAL
-			alGetError();	// This resets the error buffer
-			setDevice(NULL);
+			return _paError.c_str();
+		}
+
+		void AudioBackend::getPAError(const PaError& error)
+		{
+			if(error != paNoError)
+				throw PAErrorException(error);
+			
+			return;
+		}
+
+		AudioBackend::AudioBackend(const char *deviceName)
+		{
+			// Start PortAudio
+			getPAError(Pa_Initialize());
 		}
 
 		AudioBackend::~AudioBackend()
 		{
-			// DEBUG: Commented for now to prove OpenAL is working
-			alcCloseDevice(_device);
+			// Stops PortAudio
+			getPAError(Pa_Terminate());
+		}
+
+		int AudioBackend::audioCallback(const void *inputBuffer, void *outputBuffer,
+										unsigned long framesPerBuffer,
+										const PaStreamCallbackTimeInfo *timeInfo,
+										PaStreamCallbackFlags statusFlags,
+										void *userData)
+		{
+			
 		}
 
 		void AudioBackend::setDevice(const char *deviceName)
 		{
-			if(_device)
-				alcCloseDevice(_device);
-			
-			_device = alcOpenDevice((ALCchar*)deviceName);
 
-			if(!_device)
-				throw AudioDeviceNotFoundException(deviceName);
 		}
 
 		AudioBackend* AudioBackend::_instance = nullptr;
@@ -65,28 +83,14 @@ namespace AuroraFW {
 			return *_instance;
 		}
 
-		char* AudioBackend::getOutputDevices() const
+		char* AudioBackend::getOutputDevices()
 		{
-			if(alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE) {
-				if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") == AL_TRUE) {
-					const ALCchar *devices = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-					return (char*)devices;
-				} else {
-					const ALCchar *devices = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
-					return (char*)devices;
-				}
-			} else {
-				return "";
-			}
+
 		}
 
-		char* AudioBackend::getInputDevices() const
+		char* AudioBackend::getInputDevices()
 		{
-			if(alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE) {
-				const ALCchar *devices = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
-				return (char*)devices;
-			}
-			return "";
+
 		}
 	}
 }
