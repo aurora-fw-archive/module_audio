@@ -46,10 +46,10 @@ namespace AuroraFW {
 			AudioStream(const char *);
 			AudioStream(AudioStream& );
 
-			void setFile(const char *)
+			void setFile(const char *);
 			
 		private:
-			PaStream paStream;
+			PaStream *paStream;
 		};
 
 		struct AFW_EXPORT AudioSource {
