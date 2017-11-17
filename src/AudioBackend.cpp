@@ -33,7 +33,8 @@ namespace AuroraFW {
 		}
 
 		PAErrorException::PAErrorException(const PaError& paError)
-			: _paError(std::string("PortAudio error: " + std::string(Pa_GetErrorText(paError)))) {}
+			: _paError(std::string("PortAudio error: " + std::string(Pa_GetErrorText(paError))))
+		{}
 		
 		const char* PAErrorException::what() const throw()
 		{
