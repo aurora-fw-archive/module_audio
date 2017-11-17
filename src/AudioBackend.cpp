@@ -24,7 +24,8 @@ namespace AuroraFW {
 			: _deviceName(deviceName
 				? std::string("The device \"" + std::string(deviceName) + "\" does not exist!")
 				: std::string("OpenAL couldn't find an audio device. "
-				"Make sure you have a sound card and that is compatible with OpenAL.")) {}
+				"Make sure you have a sound card and that is compatible with OpenAL."))
+		{}
 
 		const char* AudioDeviceNotFoundException::what() const throw()
 		{
@@ -43,7 +44,6 @@ namespace AuroraFW {
 		{
 			if(error != paNoError)
 				throw PAErrorException(error);
-			
 			return;
 		}
 
@@ -64,14 +64,10 @@ namespace AuroraFW {
 										const PaStreamCallbackTimeInfo *timeInfo,
 										PaStreamCallbackFlags statusFlags,
 										void *userData)
-		{
-			
-		}
+		{}
 
 		void AudioBackend::setDevice(const char *deviceName)
-		{
-
-		}
+		{}
 
 		AudioBackend* AudioBackend::_instance = nullptr;
 
@@ -79,18 +75,13 @@ namespace AuroraFW {
 		{
 			if(_instance == nullptr)
 				_instance = new AudioBackend();
-
 			return *_instance;
 		}
 
 		char* AudioBackend::getOutputDevices()
-		{
-
-		}
+		{}
 
 		char* AudioBackend::getInputDevices()
-		{
-
-		}
+		{}
 	}
 }
