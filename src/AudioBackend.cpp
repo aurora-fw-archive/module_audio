@@ -67,9 +67,6 @@ namespace AuroraFW {
 										void *userData)
 		{}
 
-		void AudioBackend::setDevice(const char *deviceName)
-		{}
-
 		AudioBackend* AudioBackend::_instance = nullptr;
 
 		AudioBackend& AudioBackend::getInstance()
@@ -79,10 +76,94 @@ namespace AuroraFW {
 			return *_instance;
 		}
 
-		char* AudioBackend::getOutputDevices()
-		{}
+		/*const AudioDevice * AudioBackend::getAllDevices()
+		{
+			int numDevices = getNumDevices();
+			AudioDevice *audioDevices = new AudioDevice [numDevices];
+			for(int i = 0; i < numDevices; i++) {
+				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
+			}
+		}*/
 
-		char* AudioBackend::getInputDevices()
-		{}
+		const AudioDevice* AudioBackend::getAllDevices()
+		{
+			int numDevices = getNumDevices();
+			AudioDevice audioDevices[numDevices];
+			for(int i = 0; i < numDevices; i++) {
+				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
+			}
+		}
+
+		const AudioDevice * AudioBackend::getOutputDevices()
+		{
+			// TODO
+		}
+
+		const AudioDevice * AudioBackend::getInputDevices()
+		{
+			// TODO
+		}
+
+		AudioDevice::AudioDevice()
+			: _deviceInfo(Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice())) {}
+
+		AudioDevice::AudioDevice(const PaDeviceInfo *deviceInfo)
+			: _deviceInfo(deviceInfo) {}
+
+		const char* AudioDevice::getName() const
+		{
+			AuroraFW::Debug::Log(std::addressof(_deviceInfo));
+			return _deviceInfo->name;
+		}
+
+		PaHostApiIndex AudioDevice::getHostAPI() const
+		{
+			return _deviceInfo->hostApi;
+		}
+
+		int AudioDevice::getMaxInputChannels() const
+		{
+			return _deviceInfo->maxInputChannels;
+		}
+
+		int AudioDevice::getMaxOutputChannels() const
+		{
+			return _deviceInfo->maxOutputChannels;
+		}
+
+		PaTime AudioDevice::getDefaultLowInputLatency() const
+		{
+			return _deviceInfo->defaultLowInputLatency;
+		}
+
+		PaTime AudioDevice::getDefaultLowOutputLatency() const
+		{
+			return _deviceInfo->defaultLowOutputLatency;
+		}
+
+		PaTime AudioDevice::getDefaultHighInputLatency() const
+		{
+			return _deviceInfo->defaultHighInputLatency;
+		}
+
+		PaTime AudioDevice::getDefaultHighOutputLatency() const
+		{
+			return _deviceInfo->defaultHighOutputLatency;
+		}
+
+		double AudioDevice::getDefaultSampleRate() const
+		{
+			return _deviceInfo->defaultSampleRate;
+		}
+
+		bool AudioDevice::isInputDevice() const
+		{
+			return getMaxInputChannels() > 0;
+		}
+
+		bool AudioDevice::isOutputDevice() const
+		{
+			return getMaxOutputChannels() > 0;
+		}
 	}
 }

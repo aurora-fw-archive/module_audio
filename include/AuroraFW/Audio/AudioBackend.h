@@ -50,22 +50,58 @@ namespace AuroraFW {
 			virtual const char* what() const throw();
 		};
 
+		struct AFW_EXPORT AudioDevice {
+			AudioDevice();
+			AudioDevice(const PaDeviceInfo *);
+
+			~AudioDevice() {};
+
+			const char * getName() const;
+			PaHostApiIndex getHostAPI() const;
+			int getMaxInputChannels() const;
+			int getMaxOutputChannels() const;
+			PaTime getDefaultLowInputLatency() const;
+			PaTime getDefaultLowOutputLatency() const;
+			PaTime getDefaultHighInputLatency() const;
+			PaTime getDefaultHighOutputLatency() const;
+			double getDefaultSampleRate() const;
+
+			bool isInputDevice() const;
+			bool isOutputDevice() const;
+
+		private:
+			const PaDeviceInfo *_deviceInfo;
+		};
+
 		class AFW_EXPORT AudioBackend {
 		private:
 			static AudioBackend *_instance;
 			AudioBackend(const char * = NULL);
 
 			int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+			
 			void getPAError(const PaError&);
+			void getDevices();
+
 		public:
 			~AudioBackend();
 
 			static AudioBackend& getInstance();
 
-			char* getOutputDevices();
-			char* getInputDevices();
-			void setDevice(const char *);
+			const AudioDevice * getAllDevices();
+			const AudioDevice * getOutputDevices();
+			const AudioDevice * getInputDevices();
+			int getNumDevices();
+
+			void setInputDevice(AudioDevice );
+			void setOutputDevice(AudioDevice );
 		};
+
+		// Inline definitions
+		inline int AudioBackend::getNumDevices()
+		{
+			return Pa_GetDeviceCount();
+		}
 	}
 }
 
