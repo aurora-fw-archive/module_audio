@@ -85,13 +85,15 @@ namespace AuroraFW {
 			}
 		}*/
 
-		const AudioDevice* AudioBackend::getAllDevices()
+		AudioDevice* AudioBackend::getAllDevices()
 		{
 			int numDevices = getNumDevices();
-			AudioDevice audioDevices[numDevices];
+			AudioDevice *audioDevices = new AudioDevice[numDevices];
 			for(int i = 0; i < numDevices; i++) {
 				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
 			}
+
+			return audioDevices;
 		}
 
 		const AudioDevice * AudioBackend::getOutputDevices()
@@ -112,7 +114,6 @@ namespace AuroraFW {
 
 		const char* AudioDevice::getName() const
 		{
-			AuroraFW::Debug::Log(std::addressof(_deviceInfo));
 			return _deviceInfo->name;
 		}
 

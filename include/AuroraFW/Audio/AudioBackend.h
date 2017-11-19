@@ -52,11 +52,12 @@ namespace AuroraFW {
 
 		struct AFW_EXPORT AudioDevice {
 			AudioDevice();
-			AudioDevice(const PaDeviceInfo *);
+			AudioDevice(const PaDeviceInfo* );
+			AudioDevice(const AudioDevice& ) = delete;
 
 			~AudioDevice() {};
 
-			const char * getName() const;
+			const char* getName() const;
 			PaHostApiIndex getHostAPI() const;
 			int getMaxInputChannels() const;
 			int getMaxOutputChannels() const;
@@ -88,9 +89,9 @@ namespace AuroraFW {
 
 			static AudioBackend& getInstance();
 
-			const AudioDevice * getAllDevices();
-			const AudioDevice * getOutputDevices();
-			const AudioDevice * getInputDevices();
+			AudioDevice* getAllDevices();
+			const AudioDevice* getOutputDevices();
+			const AudioDevice* getInputDevices();
 			int getNumDevices();
 
 			void setInputDevice(AudioDevice );
