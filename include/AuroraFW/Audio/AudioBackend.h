@@ -77,31 +77,58 @@ namespace AuroraFW {
 		class AFW_EXPORT AudioBackend {
 		private:
 			static AudioBackend *_instance;
-			AudioBackend(const char * = NULL);
+			AudioBackend();
 
 			int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
-			
+
 			void getPAError(const PaError&);
-			void getDevices();
+
+			const AudioDevice* getDevices();
+
+			int calcNumDevices();
+			int calcNumOutputDevices();
+			int calcNumInputDevices();
+
+			int numDevices;
+			int numOutputDevices;
+			int numInputDevices;
 
 		public:
 			~AudioBackend();
 
 			static AudioBackend& getInstance();
 
-			AudioDevice* getAllDevices();
+			const AudioDevice* getAllDevices();
 			const AudioDevice* getOutputDevices();
 			const AudioDevice* getInputDevices();
-			int getNumDevices();
 
 			void setInputDevice(AudioDevice );
 			void setOutputDevice(AudioDevice );
+
+			const int getNumDevices();
+			const int getNumOutputDevices();
+			const int getNumInputDevices();
 		};
 
 		// Inline definitions
-		inline int AudioBackend::getNumDevices()
+		inline int AudioBackend::calcNumDevices()
 		{
 			return Pa_GetDeviceCount();
+		}
+
+		inline const int AudioBackend::getNumDevices()
+		{
+			return numDevices;
+		}
+
+		inline const int AudioBackend::getNumOutputDevices()
+		{
+			return numOutputDevices;
+		}
+		
+		inline const int AudioBackend::getNumInputDevices()
+		{
+			return numInputDevices;
 		}
 	}
 }

@@ -48,10 +48,59 @@ namespace AuroraFW {
 			return;
 		}
 
-		AudioBackend::AudioBackend(const char *deviceName)
+		const AudioDevice* AudioBackend::getDevices()
 		{
-			// Start PortAudio
+			int numDevices = getNumDevices();
+			AudioDevice *audioDevices = new AudioDevice[numDevices];
+			for(int i = 0; i < numDevices; i++) {
+				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
+			}
+			
+			return const_cast<const AudioDevice*>(audioDevices);
+		}
+
+		int AudioBackend::calcNumOutputDevices()
+		{
+			int numDevices = getNumDevices();
+			const AudioDevice *audioDevices = getDevices();
+			for(int i = 0; i < getNumDevices(); i++) {
+				if(audioDevices[i].getMaxOutputChannels() < 1)
+					numDevices--;
+			}
+
+			AuroraFW::Debug::Log("Num. of output devices: ", numDevices);
+
+			return numDevices;
+		}
+
+		int AudioBackend::calcNumInputDevices()
+		{
+			int numDevices = getNumDevices();
+			const AudioDevice *audioDevices = getDevices();
+			for(int i = 0; i < getNumDevices(); i++) {
+				if(audioDevices[i].getMaxInputChannels() < 1)
+					numDevices--;
+			}
+
+			AuroraFW::Debug::Log("Num. of input devices: ", numDevices);
+
+			return numDevices;
+		}
+
+		AudioBackend::AudioBackend()
+		{
+			// Starts PortAudio
 			getPAError(Pa_Initialize());
+
+			// Gets number of devices
+			numDevices = calcNumDevices();
+			numOutputDevices = calcNumOutputDevices();
+			numInputDevices = calcNumInputDevices();
+
+			// Prints verbose
+			AuroraFW::Debug::Log("AudioBackend initialized. Num. of available audio devices: ", numDevices,
+								"(", numOutputDevices, " output devices, ",
+								numInputDevices, " input devices.)");
 		}
 
 		AudioBackend::~AudioBackend()
@@ -76,32 +125,24 @@ namespace AuroraFW {
 			return *_instance;
 		}
 
-		/*const AudioDevice * AudioBackend::getAllDevices()
+		const AudioDevice* AudioBackend::getAllDevices()
 		{
-			int numDevices = getNumDevices();
-			AudioDevice *audioDevices = new AudioDevice [numDevices];
-			for(int i = 0; i < numDevices; i++) {
-				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
-			}
-		}*/
-
-		AudioDevice* AudioBackend::getAllDevices()
-		{
-			int numDevices = getNumDevices();
-			AudioDevice *audioDevices = new AudioDevice[numDevices];
-			for(int i = 0; i < numDevices; i++) {
+			/*AudioDevice *audioDevices = new AudioDevice[getNumDevices()];
+			for(int i = 0; i < getNumDevices(); i++) {
 				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
 			}
 
-			return audioDevices;
+			return const_cast<const AudioDevice*>(audioDevices);*/
+
+			return getDevices();
 		}
 
-		const AudioDevice * AudioBackend::getOutputDevices()
+		const AudioDevice* AudioBackend::getOutputDevices()
 		{
 			// TODO
 		}
 
-		const AudioDevice * AudioBackend::getInputDevices()
+		const AudioDevice* AudioBackend::getInputDevices()
 		{
 			// TODO
 		}
