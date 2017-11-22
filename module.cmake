@@ -16,8 +16,6 @@
 
 message(STATUS "Loading audio module...")
 
-find_package(OpenAL REQUIRED)
-
 if (NOT CONFIGURED_ONCE)
 	set(AURORAFW_MODULE_AUDIO_SOURCE_DIR ${AURORAFW_MODULE_AUDIO_DIR}/src)
 endif()
