@@ -20,9 +20,13 @@
 
 namespace AuroraFW {
 	namespace AudioManager {
-		AudioStream::AudioStream() {}
-
 		AudioStream::AudioStream(const char *path)
+			: _path(path)
+		{
+			
+		}
+
+		AudioSource::AudioSource(float x, float y, float z, AudioStream stream)
 		{
 			
 		}

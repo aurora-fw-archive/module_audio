@@ -41,20 +41,21 @@ namespace AuroraFW {
 			Stop
 		};
 
+
 		struct AFW_EXPORT AudioStream {
-			AudioStream();
+			friend struct AudioSource;
+
+			AudioStream() {};
 			AudioStream(const char *);
-			AudioStream(AudioStream& );
 
 			void setFile(const char *);
-			
 		private:
-			PaStream *paStream;
+			const char *_path;
+			PaStream *_paStream;
 		};
 
 		struct AFW_EXPORT AudioSource {
-			AudioSource();
-			AudioSource(float , float , float , AudioStream& );
+			AudioSource(float , float , float , AudioStream );
 			AudioSource(AudioSource& );
 
 			void setPosition(float , float , float );

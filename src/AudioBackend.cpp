@@ -20,6 +20,7 @@
 
 namespace AuroraFW {
 	namespace AudioManager {
+		// AudioDeviceNotFoundException
 		AudioDeviceNotFoundException::AudioDeviceNotFoundException(const char *deviceName)
 			: _deviceName(deviceName
 				? std::string("The device \"" + std::string(deviceName) + "\" does not exist!")
@@ -32,6 +33,7 @@ namespace AuroraFW {
 			return _deviceName.c_str();
 		}
 
+		// PAErrorException
 		PAErrorException::PAErrorException(const PaError& paError)
 			: _paError(std::string("PortAudio error: " + std::string(Pa_GetErrorText(paError))))
 		{}
@@ -41,6 +43,7 @@ namespace AuroraFW {
 			return _paError.c_str();
 		}
 
+		// AudioBackend
 		void AudioBackend::getPAError(const PaError& error)
 		{
 			if(error != paNoError)
@@ -68,7 +71,7 @@ namespace AuroraFW {
 					numDevices--;
 			}
 
-			AuroraFW::Debug::Log("Num. of output devices: ", numDevices);
+			delete[] audioDevices;
 
 			return numDevices;
 		}
@@ -82,7 +85,7 @@ namespace AuroraFW {
 					numDevices--;
 			}
 
-			AuroraFW::Debug::Log("Num. of input devices: ", numDevices);
+			delete[] audioDevices;
 
 			return numDevices;
 		}
@@ -107,6 +110,9 @@ namespace AuroraFW {
 		{
 			// Stops PortAudio
 			getPAError(Pa_Terminate());
+
+			// Prints verbose
+			AuroraFW::Debug::Log("AudioBackend was terminated.");
 		}
 
 		int AudioBackend::audioCallback(const void *inputBuffer, void *outputBuffer,
@@ -127,24 +133,37 @@ namespace AuroraFW {
 
 		const AudioDevice* AudioBackend::getAllDevices()
 		{
-			/*AudioDevice *audioDevices = new AudioDevice[getNumDevices()];
-			for(int i = 0; i < getNumDevices(); i++) {
-				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
-			}
-
-			return const_cast<const AudioDevice*>(audioDevices);*/
-
 			return getDevices();
 		}
 
 		const AudioDevice* AudioBackend::getOutputDevices()
 		{
-			// TODO
+			AudioDevice *audioDevices = new AudioDevice[numOutputDevices];
+			int trueIndex = 0;
+			for(int i = 0; i < numDevices; i++) {
+				AudioDevice audioDevice(Pa_GetDeviceInfo(i));
+				if(audioDevice.getMaxOutputChannels() > 0) {
+					audioDevices[trueIndex] = audioDevice;
+					trueIndex++;
+				}
+			}
+
+			return audioDevices;
 		}
 
 		const AudioDevice* AudioBackend::getInputDevices()
 		{
-			// TODO
+			AudioDevice *audioDevices = new AudioDevice[numInputDevices];
+			int trueIndex = 0;
+			for(int i = 0; i < numDevices; i++) {
+				AudioDevice audioDevice(Pa_GetDeviceInfo(i));
+				if(audioDevice.getMaxInputChannels() > 0) {
+					audioDevices[trueIndex] = audioDevice;
+					trueIndex++;
+				}
+			}
+
+			return audioDevices;
 		}
 
 		AudioDevice::AudioDevice()
