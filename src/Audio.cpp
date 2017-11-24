@@ -21,14 +21,12 @@
 namespace AuroraFW {
 	namespace AudioManager {
 		AudioStream::AudioStream(const char *path)
-			: _path(path)
-		{
-			
-		}
+			: _path(path) {}
 
-		AudioSource::AudioSource(float x, float y, float z, AudioStream stream)
-		{
-			
-		}
+		AudioSource::AudioSource(const AudioStream& stream, const Math::Vector3D vec)
+			: position(vec), _stream(stream) {}
+
+		AudioSource::AudioSource(const AudioStream& stream, const float x, const float y, const float z)
+			: position(Math::Vector3D(x, y, z)), _stream(stream) {}
 	}
 }

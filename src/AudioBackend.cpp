@@ -67,7 +67,7 @@ namespace AuroraFW {
 			int numDevices = getNumDevices();
 			const AudioDevice *audioDevices = getDevices();
 			for(int i = 0; i < getNumDevices(); i++) {
-				if(audioDevices[i].getMaxOutputChannels() < 1)
+				if(!audioDevices[i].isOutputDevice())
 					numDevices--;
 			}
 
@@ -81,7 +81,7 @@ namespace AuroraFW {
 			int numDevices = getNumDevices();
 			const AudioDevice *audioDevices = getDevices();
 			for(int i = 0; i < getNumDevices(); i++) {
-				if(audioDevices[i].getMaxInputChannels() < 1)
+				if(!audioDevices[i].isInputDevice())
 					numDevices--;
 			}
 
@@ -225,6 +225,16 @@ namespace AuroraFW {
 		bool AudioDevice::isOutputDevice() const
 		{
 			return getMaxOutputChannels() > 0;
+		}
+
+		bool AudioDevice::isDefaultOutputDevice() const
+		{
+			return Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice()) == _deviceInfo;
+		}
+
+		bool AudioDevice::isDefaultInputDevice() const
+		{
+			return Pa_GetDeviceInfo(Pa_GetDefaultInputDevice()) == _deviceInfo;
 		}
 	}
 }

@@ -22,6 +22,7 @@
 // AuroraFW
 #include <AuroraFW/Global.h>
 #include <AuroraFW/Audio/AudioBackend.h>
+#include <AuroraFW/Math/Vector3D.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
@@ -47,32 +48,21 @@ namespace AuroraFW {
 
 			AudioStream() {};
 			AudioStream(const char *);
-
-			void setFile(const char *);
 		private:
 			const char *_path;
 			PaStream *_paStream;
 		};
 
 		struct AFW_EXPORT AudioSource {
-			AudioSource(float , float , float , AudioStream );
+			AudioSource(const AudioStream& , const Math::Vector3D = Math::Vector3D());
+			AudioSource(const AudioStream& , const float = 0 , const float = 0 , const float = 0);
 			AudioSource(AudioSource& );
-
-			void setPosition(float , float , float );
-			void setMedDistance(float );
-			void setMaxDistance(float );
-
-			void setVolume(float );
-			void setPitch(float );
 
 			void setStream(const AudioStream& );
 			const AudioStream& getStream();
 
 			void setLooping(bool );
 			void setLoopMode(const AudioLoopMode );
-
-			void setPosition(float );
-			float getPosition();
 
 			void play();
 			void pause();
@@ -87,7 +77,14 @@ namespace AuroraFW {
 			AudioFallout falloutType;
 			AudioStatus audioStatus;
 			AudioLoopMode audioLoopMode;
-			AudioStream audioStream;
+
+			Math::Vector3D position;
+			float medDistance;
+			float maxDistance;
+			float volume = 1;
+			float pitch = 1;
+		private:
+			AudioStream _stream;
 		};
 	}
 }

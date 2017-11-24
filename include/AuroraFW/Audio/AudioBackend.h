@@ -69,6 +69,8 @@ namespace AuroraFW {
 
 			bool isInputDevice() const;
 			bool isOutputDevice() const;
+			bool isDefaultOutputDevice() const;
+			bool isDefaultInputDevice() const;
 
 		private:
 			const PaDeviceInfo *_deviceInfo;
