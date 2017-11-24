@@ -24,6 +24,9 @@
 #include <AuroraFW/Audio/AudioBackend.h>
 #include <AuroraFW/Math/Vector3D.h>
 
+// LibSNDFile
+#include <sndfile.h>
+
 namespace AuroraFW {
 	namespace AudioManager {
 		enum class AudioFallout {
@@ -42,14 +45,25 @@ namespace AuroraFW {
 			Stop
 		};
 
+		class AudioFileNotFound: public std::exception
+		{
+		private:
+			const std::string _errorMessage;
+		public:
+			AudioFileNotFound(const char* );
+			virtual const char* what() const throw();
+		};
 
 		struct AFW_EXPORT AudioStream {
 			friend struct AudioSource;
 
-			AudioStream() {};
-			AudioStream(const char *);
+			AudioStream(const char* = nullptr , int = SF_FORMAT_VORBIS);
+			~AudioStream();
+
+			void startStream();
+			void stopStream();
 		private:
-			const char *_path;
+			SNDFILE *_soundFile = nullptr;
 			PaStream *_paStream;
 		};
 

@@ -32,15 +32,6 @@
 
 namespace AuroraFW {
 	namespace AudioManager {
-		class AudioDeviceNotFoundException: public std::exception
-		{
-		private:
-			const std::string _deviceName;
-		public:
-			AudioDeviceNotFoundException(const char *);
-			virtual const char* what() const throw();
-		};
-
 		class PAErrorException: public std::exception
 		{
 		private:
@@ -76,14 +67,14 @@ namespace AuroraFW {
 			const PaDeviceInfo *_deviceInfo;
 		};
 
+		int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+
+		int debugCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+
 		class AFW_EXPORT AudioBackend {
 		private:
 			static AudioBackend *_instance;
 			AudioBackend();
-
-			int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
-
-			void getPAError(const PaError&);
 
 			const AudioDevice* getDevices();
 
@@ -113,6 +104,12 @@ namespace AuroraFW {
 		};
 
 		// Inline definitions
+		inline void getPAError(const PaError& error)
+		{
+			if(error != paNoError)
+				throw PAErrorException(error);
+		}
+
 		inline int AudioBackend::calcNumDevices()
 		{
 			return Pa_GetDeviceCount();

@@ -20,19 +20,6 @@
 
 namespace AuroraFW {
 	namespace AudioManager {
-		// AudioDeviceNotFoundException
-		AudioDeviceNotFoundException::AudioDeviceNotFoundException(const char *deviceName)
-			: _deviceName(deviceName
-				? std::string("The device \"" + std::string(deviceName) + "\" does not exist!")
-				: std::string("OpenAL couldn't find an audio device. "
-				"Make sure you have a sound card and that is compatible with OpenAL."))
-		{}
-
-		const char* AudioDeviceNotFoundException::what() const throw()
-		{
-			return _deviceName.c_str();
-		}
-
 		// PAErrorException
 		PAErrorException::PAErrorException(const PaError& paError)
 			: _paError(std::string("PortAudio error: " + std::string(Pa_GetErrorText(paError))))
@@ -43,14 +30,43 @@ namespace AuroraFW {
 			return _paError.c_str();
 		}
 
-		// AudioBackend
-		void AudioBackend::getPAError(const PaError& error)
+		// audioCallBack
+		int audioCallback(const void *inputBuffer, void *outputBuffer,
+										unsigned long framesPerBuffer,
+										const PaStreamCallbackTimeInfo *timeInfo,
+										PaStreamCallbackFlags statusFlags,
+										void *userData)
 		{
-			if(error != paNoError)
-				throw PAErrorException(error);
-			return;
+			// TODO
 		}
 
+		// debugCallBack
+		int debugCallback(const void *inputBuffer, void *outputBuffer,
+						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
+						PaStreamCallbackFlags statusFlags, void *userData)
+		{
+			float left_ear = -1;
+			float right_ear = -1;
+
+			float *output = (float*)outputBuffer;
+
+			for(unsigned int i = 0; i < framesPerBuffer; i++) {
+				*output++ = left_ear;
+				*output++ = right_ear;
+
+				left_ear += 0.01f;
+				if(left_ear >= 1.0f)
+					left_ear -= 2.0f;
+
+				right_ear += 0.05f;
+				if(right_ear >= 1.0f)
+					right_ear -= 2.0f;
+			}
+
+			return 0;
+		}
+
+		// AudioBackend
 		const AudioDevice* AudioBackend::getDevices()
 		{
 			int numDevices = getNumDevices();
@@ -114,13 +130,6 @@ namespace AuroraFW {
 			// Prints verbose
 			AuroraFW::Debug::Log("AudioBackend was terminated.");
 		}
-
-		int AudioBackend::audioCallback(const void *inputBuffer, void *outputBuffer,
-										unsigned long framesPerBuffer,
-										const PaStreamCallbackTimeInfo *timeInfo,
-										PaStreamCallbackFlags statusFlags,
-										void *userData)
-		{}
 
 		AudioBackend* AudioBackend::_instance = nullptr;
 
