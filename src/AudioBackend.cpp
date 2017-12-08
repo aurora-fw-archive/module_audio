@@ -17,6 +17,7 @@
 ****************************************************************************/
 
 #include <AuroraFW/Audio/AudioBackend.h>
+#include <AuroraFW/Audio/Audio.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
@@ -30,14 +31,24 @@ namespace AuroraFW {
 			return _paError.c_str();
 		}
 
+		int numTimes = 0;
 		// audioCallBack
 		int audioCallback(const void *inputBuffer, void *outputBuffer,
-										unsigned long framesPerBuffer,
-										const PaStreamCallbackTimeInfo *timeInfo,
-										PaStreamCallbackFlags statusFlags,
-										void *userData)
+						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
+						PaStreamCallbackFlags statusFlags, void *userData)
 		{
-			// TODO
+			float *output = (float*)outputBuffer;
+			AudioStream *audioStream = (AudioStream*)userData;
+			float readFrames = sf_readf_float(audioStream->_soundFile, output, framesPerBuffer);
+			AuroraFW::Debug::Log("Read frames: ", readFrames);
+			AuroraFW::Debug::Log("Callback was called ", ++numTimes, " times.");
+
+			if(readFrames > 0)
+				return paContinue;
+			else {
+				audioStream->streamPlaying = false;
+				return paComplete;
+			}
 		}
 
 		// debugCallBack
@@ -45,22 +56,22 @@ namespace AuroraFW {
 						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
 						PaStreamCallbackFlags statusFlags, void *userData)
 		{
-			float left_ear = -1;
-			float right_ear = -1;
+			uint8_t left_ear = 0;
+			uint8_t right_ear = 0;
 
-			float *output = (float*)outputBuffer;
+			uint8_t *output = (uint8_t*)outputBuffer;
 
 			for(unsigned int i = 0; i < framesPerBuffer; i++) {
 				*output++ = left_ear;
 				*output++ = right_ear;
 
-				left_ear += 0.01f;
-				if(left_ear >= 1.0f)
-					left_ear -= 2.0f;
+				left_ear += 1;
+				if(left_ear >= 255)
+					left_ear -= -255;
 
-				right_ear += 0.05f;
-				if(right_ear >= 1.0f)
-					right_ear -= 2.0f;
+				right_ear += 3;
+				if(right_ear >= 255)
+					right_ear -= -255;
 			}
 
 			return 0;

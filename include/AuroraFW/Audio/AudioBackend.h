@@ -44,7 +44,6 @@ namespace AuroraFW {
 		struct AFW_EXPORT AudioDevice {
 			AudioDevice();
 			AudioDevice(const PaDeviceInfo* );
-			AudioDevice(const AudioDevice& ) = delete;
 
 			~AudioDevice() {};
 

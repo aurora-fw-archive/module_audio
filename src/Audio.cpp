@@ -29,17 +29,17 @@ namespace AuroraFW {
 			return _errorMessage.c_str();
 		}
 
-		AudioStream::AudioStream(const char *path, int format)
+		AudioStream::AudioStream(const char *path, int format, const AudioDevice& device)
 		{
 			// If path is null, run the debug callback
 			if(path == nullptr) {
 				AuroraFW::Debug::Log("Debug mode activated for AudioStream instance");
-				getPAError(Pa_OpenDefaultStream(&_paStream, 0, 2, paFloat32,
-											44100, 256, debugCallback, NULL));
+				getPAError(Pa_OpenDefaultStream(&_paStream, 0, device.getMaxOutputChannels(), paUInt8,
+											device.getDefaultSampleRate(), paFramesPerBufferUnspecified, debugCallback, NULL));
 			} else {
 				// Gets the SNDFILE* from libsndfile
 				SF_INFO sndInfo;
-				sndInfo.format = format;
+				sndInfo.format = 0;
 
 				_soundFile = sf_open(path, SFM_READ, &sndInfo);
 
@@ -47,9 +47,9 @@ namespace AuroraFW {
 				if(_soundFile == nullptr)
 					throw AudioFileNotFound(path);
 
-				// DEBUG: Open the PortAudio stream with debug callback
+				// Opens the audio stream
 				getPAError(Pa_OpenDefaultStream(&_paStream, 0, 2, paFloat32,
-												44100, 256, audioCallback, NULL));
+												device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioCallback, this));
 			}
 		}
 
@@ -63,11 +63,18 @@ namespace AuroraFW {
 		void AudioStream::startStream()
 		{
 			getPAError(Pa_StartStream(_paStream));
+			streamPlaying = true;
 		}
 
 		void AudioStream::stopStream()
 		{
 			getPAError(Pa_StopStream(_paStream));
+			streamPlaying = false;
+		}
+
+		bool AudioStream::isStreamPlaying()
+		{
+			return streamPlaying;
 		}
 
 		AudioSource::AudioSource(const AudioStream& stream, const Math::Vector3D vec)

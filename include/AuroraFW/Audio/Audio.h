@@ -56,15 +56,19 @@ namespace AuroraFW {
 
 		struct AFW_EXPORT AudioStream {
 			friend struct AudioSource;
+			friend int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
-			AudioStream(const char* = nullptr , int = SF_FORMAT_VORBIS);
+			AudioStream(const char* = nullptr , int = SF_FORMAT_VORBIS, const AudioDevice& = AudioDevice());
 			~AudioStream();
 
 			void startStream();
 			void stopStream();
+
+			bool isStreamPlaying();
 		private:
 			SNDFILE *_soundFile = nullptr;
 			PaStream *_paStream;
+			bool streamPlaying;
 		};
 
 		struct AFW_EXPORT AudioSource {
