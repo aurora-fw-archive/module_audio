@@ -42,7 +42,8 @@ namespace AuroraFW {
 		enum class AudioStatus {
 			Play,
 			Pause,
-			Stop
+			Stop,
+			CallbackStop
 		};
 
 		class AudioFileNotFound: public std::exception
@@ -54,33 +55,26 @@ namespace AuroraFW {
 			virtual const char* what() const throw();
 		};
 
+		struct AFW_EXPORT AudioSource {
+			AudioSource(const Math::Vector3D = Math::Vector3D());
+			AudioSource(const float = 0 , const float = 0 , const float = 0);
+			AudioSource(const AudioSource& );
+
+			void setAudioFalloutType(const AudioFallout );
+
+			AudioFallout falloutType;
+
+			Math::Vector3D position;
+			float medDistance;
+			float maxDistance;
+		};
+
 		struct AFW_EXPORT AudioStream {
 			friend struct AudioSource;
 			friend int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
-			AudioStream(const char* = nullptr , int = SF_FORMAT_VORBIS, const AudioDevice& = AudioDevice());
+			AudioStream(const char* = nullptr , int = SF_FORMAT_VORBIS, const AudioDevice& = AudioDevice(), AudioSource* = nullptr);
 			~AudioStream();
-
-			void startStream();
-			void stopStream();
-
-			bool isStreamPlaying();
-		private:
-			SNDFILE *_soundFile = nullptr;
-			PaStream *_paStream;
-			bool streamPlaying;
-		};
-
-		struct AFW_EXPORT AudioSource {
-			AudioSource(const AudioStream& , const Math::Vector3D = Math::Vector3D());
-			AudioSource(const AudioStream& , const float = 0 , const float = 0 , const float = 0);
-			AudioSource(AudioSource& );
-
-			void setStream(const AudioStream& );
-			const AudioStream& getStream();
-
-			void setLooping(bool );
-			void setLoopMode(const AudioLoopMode );
 
 			void play();
 			void pause();
@@ -90,19 +84,27 @@ namespace AuroraFW {
 			bool isPaused();
 			bool isStopped();
 
-			void setAudioFalloutType(const AudioFallout );
+			void setStreamPos(unsigned int );
+			void setStreamPosFrame(unsigned int );
 
-			AudioFallout falloutType;
-			AudioStatus audioStatus;
+			void setLooping(bool );
+
+			AudioSource* getAudioSource();
+			void setAudioSource(const AudioSource& );
+			
 			AudioLoopMode audioLoopMode;
 
-			Math::Vector3D position;
-			float medDistance;
-			float maxDistance;
 			float volume = 1;
 			float pitch = 1;
 		private:
-			AudioStream _stream;
+			SNDFILE *_soundFile = nullptr;
+			PaStream *_paStream;
+
+			AudioStatus _audioStatus = AudioStatus::Stop;
+			unsigned int _streamPosFrame = 0;
+			bool _looping = false;
+			
+			AudioSource *_audioSource;
 		};
 	}
 }
