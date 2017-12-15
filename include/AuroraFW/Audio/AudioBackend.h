@@ -23,7 +23,7 @@
 #include <AuroraFW/Global.h>
 #include <AuroraFW/STDL/STL/IOStream.h>
 #include <AuroraFW/Core/Debug.h>
-//#include <AuroraFW/Audio/Audio.h>
+#include <AuroraFW/CLI/Log.h>
 
 // PortAudio
 #include <portaudio.h>
@@ -67,10 +67,6 @@ namespace AuroraFW {
 			const PaDeviceInfo *_deviceInfo;
 		};
 
-		int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
-
-		int debugCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
-
 		class AFW_EXPORT AudioBackend {
 		private:
 			static AudioBackend *_instance;
@@ -87,9 +83,11 @@ namespace AuroraFW {
 			int numInputDevices;
 
 		public:
-			~AudioBackend();
+			~AudioBackend() {};
 
+			static void start();
 			static AudioBackend& getInstance();
+			static void terminate();
 
 			const AudioDevice* getAllDevices();
 			const AudioDevice* getOutputDevices();

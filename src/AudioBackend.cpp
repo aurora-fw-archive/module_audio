@@ -30,115 +30,7 @@ namespace AuroraFW {
 			return _paError.c_str();
 		}
 
-		// AudioBackend
-		const AudioDevice* AudioBackend::getDevices()
-		{
-			int numDevices = getNumDevices();
-			AudioDevice *audioDevices = new AudioDevice[numDevices];
-			for(int i = 0; i < numDevices; i++) {
-				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
-			}
-			
-			return const_cast<const AudioDevice*>(audioDevices);
-		}
-
-		int AudioBackend::calcNumOutputDevices()
-		{
-			int numDevices = getNumDevices();
-			const AudioDevice *audioDevices = getDevices();
-			for(int i = 0; i < getNumDevices(); i++) {
-				if(!audioDevices[i].isOutputDevice())
-					numDevices--;
-			}
-
-			delete[] audioDevices;
-
-			return numDevices;
-		}
-
-		int AudioBackend::calcNumInputDevices()
-		{
-			int numDevices = getNumDevices();
-			const AudioDevice *audioDevices = getDevices();
-			for(int i = 0; i < getNumDevices(); i++) {
-				if(!audioDevices[i].isInputDevice())
-					numDevices--;
-			}
-
-			delete[] audioDevices;
-
-			return numDevices;
-		}
-
-		AudioBackend::AudioBackend()
-		{
-			// Starts PortAudio
-			getPAError(Pa_Initialize());
-
-			// Gets number of devices
-			numDevices = calcNumDevices();
-			numOutputDevices = calcNumOutputDevices();
-			numInputDevices = calcNumInputDevices();
-
-			// Prints verbose
-			AuroraFW::Debug::Log("AudioBackend initialized. Num. of available audio devices: ", numDevices,
-								"(", numOutputDevices, " output devices, ",
-								numInputDevices, " input devices.)");
-		}
-
-		AudioBackend::~AudioBackend()
-		{
-			// Stops PortAudio
-			getPAError(Pa_Terminate());
-
-			// Prints verbose
-			AuroraFW::Debug::Log("AudioBackend was terminated.");
-		}
-
-		AudioBackend* AudioBackend::_instance = nullptr;
-
-		AudioBackend& AudioBackend::getInstance()
-		{
-			if(_instance == nullptr)
-				_instance = new AudioBackend();
-			return *_instance;
-		}
-
-		const AudioDevice* AudioBackend::getAllDevices()
-		{
-			return getDevices();
-		}
-
-		const AudioDevice* AudioBackend::getOutputDevices()
-		{
-			AudioDevice *audioDevices = new AudioDevice[numOutputDevices];
-			int trueIndex = 0;
-			for(int i = 0; i < numDevices; i++) {
-				AudioDevice audioDevice(Pa_GetDeviceInfo(i));
-				if(audioDevice.getMaxOutputChannels() > 0) {
-					audioDevices[trueIndex] = audioDevice;
-					trueIndex++;
-				}
-			}
-
-			return audioDevices;
-		}
-
-		const AudioDevice* AudioBackend::getInputDevices()
-		{
-			AudioDevice *audioDevices = new AudioDevice[numInputDevices];
-			int trueIndex = 0;
-			for(int i = 0; i < numDevices; i++) {
-				AudioDevice audioDevice(Pa_GetDeviceInfo(i));
-				if(audioDevice.getMaxInputChannels() > 0) {
-					audioDevices[trueIndex] = audioDevice;
-					trueIndex++;
-				}
-			}
-
-			return audioDevices;
-		}
-
+		// AudioDevice
 		AudioDevice::AudioDevice()
 			: _deviceInfo(Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice())) {}
 
@@ -208,6 +100,133 @@ namespace AuroraFW {
 		bool AudioDevice::isDefaultInputDevice() const
 		{
 			return Pa_GetDeviceInfo(Pa_GetDefaultInputDevice()) == _deviceInfo;
+		}
+
+		// AudioBackend
+		AudioBackend::AudioBackend()
+		{
+			// Starts PortAudio
+			getPAError(Pa_Initialize());
+
+			// Gets number of devices
+			numDevices = calcNumDevices();
+			numOutputDevices = calcNumOutputDevices();
+			numInputDevices = calcNumInputDevices();
+
+			// Prints verbose
+			AuroraFW::Debug::Log("AudioBackend initialized. Num. of available audio devices: ", numDevices,
+								"(", numOutputDevices, " output devices, ",
+								numInputDevices, " input devices.)");
+		}
+
+		const AudioDevice* AudioBackend::getDevices()
+		{
+			int numDevices = getNumDevices();
+			AudioDevice *audioDevices = new AudioDevice[numDevices];
+			for(int i = 0; i < numDevices; i++) {
+				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
+			}
+			
+			return const_cast<const AudioDevice*>(audioDevices);
+		}
+
+		int AudioBackend::calcNumOutputDevices()
+		{
+			int numDevices = getNumDevices();
+			const AudioDevice *audioDevices = getDevices();
+			for(int i = 0; i < getNumDevices(); i++) {
+				if(!audioDevices[i].isOutputDevice())
+					numDevices--;
+			}
+
+			delete[] audioDevices;
+
+			return numDevices;
+		}
+
+		int AudioBackend::calcNumInputDevices()
+		{
+			int numDevices = getNumDevices();
+			const AudioDevice *audioDevices = getDevices();
+			for(int i = 0; i < getNumDevices(); i++) {
+				if(!audioDevices[i].isInputDevice())
+					numDevices--;
+			}
+
+			delete[] audioDevices;
+
+			return numDevices;
+		}
+
+		// TODO: Subject to change, plan changes well and revisit later
+		void AudioBackend::start()
+		{
+			if(_instance == nullptr)
+				_instance = new AudioBackend();
+			else
+				CLI::Log(CLI::Warning, "The AudioBackend was already initialized. This method shouldn't be called twice!");
+		}
+
+		AudioBackend* AudioBackend::_instance = nullptr;
+
+		AudioBackend& AudioBackend::getInstance()
+		{
+			if(_instance == nullptr)
+				_instance = new AudioBackend();
+			return *_instance;
+		}
+
+		void AudioBackend::terminate()
+		{
+			// Safe guard in case someone terminates it when it's already deleted
+			if(_instance != nullptr) {
+				// Stops PortAudio
+				getPAError(Pa_Terminate());
+
+				// Deletes the instance (in case it will be reused again)
+				delete _instance;
+				_instance = nullptr;
+
+				// Prints verbose
+				AuroraFW::Debug::Log("AudioBackend was terminated.");
+			} else {
+				CLI::Log(CLI::Warning, "The AudioBackEnd was already terminated. This method shouldn't be called twice!");
+			}
+		}
+
+		const AudioDevice* AudioBackend::getAllDevices()
+		{
+			return getDevices();
+		}
+
+		const AudioDevice* AudioBackend::getOutputDevices()
+		{
+			AudioDevice* audioDevices = new AudioDevice[numOutputDevices];
+			int trueIndex = 0;
+			for(int i = 0; i < numDevices; i++) {
+				AudioDevice audioDevice(Pa_GetDeviceInfo(i));
+				if(audioDevice.getMaxOutputChannels() > 0) {
+					audioDevices[trueIndex] = audioDevice;
+					trueIndex++;
+				}
+			}
+
+			return audioDevices;
+		}
+
+		const AudioDevice* AudioBackend::getInputDevices()
+		{
+			AudioDevice* audioDevices = new AudioDevice[numInputDevices];
+			int trueIndex = 0;
+			for(int i = 0; i < numDevices; i++) {
+				AudioDevice audioDevice(Pa_GetDeviceInfo(i));
+				if(audioDevice.getMaxInputChannels() > 0) {
+					audioDevices[trueIndex] = audioDevice;
+					trueIndex++;
+				}
+			}
+
+			return audioDevices;
 		}
 	}
 }

@@ -55,6 +55,8 @@ namespace AuroraFW {
 			virtual const char* what() const throw();
 		};
 
+		
+
 		struct AFW_EXPORT AudioSource {
 			AudioSource(const Math::Vector3D = Math::Vector3D());
 			AudioSource(const float = 0 , const float = 0 , const float = 0);
@@ -73,7 +75,7 @@ namespace AuroraFW {
 			friend struct AudioSource;
 			friend int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
-			AudioStream(const char* = nullptr , int = SF_FORMAT_VORBIS, const AudioDevice& = AudioDevice(), AudioSource* = nullptr);
+			AudioStream(const char* = nullptr, const AudioDevice& = AudioDevice(), AudioSource* = nullptr);
 			~AudioStream();
 
 			void play();
@@ -98,6 +100,7 @@ namespace AuroraFW {
 			float pitch = 1;
 		private:
 			SNDFILE *_soundFile = nullptr;
+			SF_INFO _sndInfo;
 			PaStream *_paStream;
 
 			AudioStatus _audioStatus = AudioStatus::Stop;
@@ -106,6 +109,10 @@ namespace AuroraFW {
 			
 			AudioSource *_audioSource;
 		};
+
+		int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+
+		int debugCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 	}
 }
 

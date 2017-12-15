@@ -17,6 +17,7 @@
 ****************************************************************************/
 
 #include <AuroraFW/Audio/Audio.h>
+#include <iostream>
 
 namespace AuroraFW {
 	namespace AudioManager {
@@ -35,17 +36,32 @@ namespace AuroraFW {
 						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
 						PaStreamCallbackFlags statusFlags, void *userData)
 		{
-			float *output = (float*)outputBuffer;
+			// Gets the output buffer (it's of type paInt32)
+			int *output = (int*)outputBuffer;
 			AudioStream *audioStream = (AudioStream*)userData;
+
+			// In case the audio stream is paused, saves the current position and stops the stream
 			if(audioStream->_audioStatus == AudioStatus::Pause) {
 				audioStream->_streamPosFrame = sf_seek(audioStream->_soundFile, 0, SF_SEEK_CUR);
 				return paComplete;
 			}
-			float readFrames = sf_readf_float(audioStream->_soundFile, output, framesPerBuffer);
 
-			if(readFrames > 0)
+			// Reads the frames from music file (fills the buffer basically)
+			int readFrames = sf_readf_int(audioStream->_soundFile, output, framesPerBuffer);
+
+			// Adjusts the volume of each frame
+			for(unsigned int i = 0; i < readFrames; i++) {
+				// Applies the volume to all channels the sound might have
+				for(uint8_t channels = 0; channels < audioStream->_sndInfo.channels; channels++) {
+					*output++ = *output * audioStream->volume;
+				}
+			}
+
+			// If the read frames filled the buffer to read, continues playing
+			if(readFrames == framesPerBuffer) {
 				return paContinue;
-			else {
+			// Else it means it reached end of file. Stops the callback.
+			} else {
 				audioStream->_audioStatus = AudioStatus::CallbackStop;
 				return paComplete;
 			}
@@ -87,9 +103,9 @@ namespace AuroraFW {
 		AudioSource::AudioSource(const AudioSource& audioSource)
 			: falloutType(audioSource.falloutType), position(audioSource.position),
 				medDistance(audioSource.medDistance), maxDistance(audioSource.maxDistance) {}
-
+	
 		// AudioStream
-		AudioStream::AudioStream(const char *path, int format, const AudioDevice& device, AudioSource *audioSource)
+		AudioStream::AudioStream(const char *path, const AudioDevice& device, AudioSource *audioSource)
 			: _audioSource(audioSource)
 		{
 			// If path is null, run the debug callback
@@ -99,17 +115,16 @@ namespace AuroraFW {
 											device.getDefaultSampleRate(), 256, debugCallback, NULL));
 			} else {
 				// Gets the SNDFILE* from libsndfile
-				SF_INFO sndInfo;
-				sndInfo.format = 0;
+				_sndInfo.format = 0;
 
-				_soundFile = sf_open(path, SFM_READ, &sndInfo);
+				_soundFile = sf_open(path, SFM_READ, &_sndInfo);
 
 				// If the soundFile is null, it means there was no audio file
 				if(_soundFile == nullptr)
 					throw AudioFileNotFound(path);
 
 				// Opens the audio stream
-				getPAError(Pa_OpenDefaultStream(&_paStream, 0, sndInfo.channels, paFloat32,
+				getPAError(Pa_OpenDefaultStream(&_paStream, 0, _sndInfo.channels, paInt32,
 												device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioCallback, this));
 			}
 		}
@@ -121,8 +136,7 @@ namespace AuroraFW {
 				sf_close(_soundFile);
 
 			// Deletes audioSource
-			if(_audioSource != nullptr)
-				delete _audioSource;
+			delete _audioSource;
 		}
 
 		void AudioStream::play()
@@ -168,7 +182,7 @@ namespace AuroraFW {
 
 		void AudioStream::setStreamPos(unsigned int pos)
 		{
-
+			// TODO: Implement
 		}
 
 		void AudioStream::setStreamPosFrame(unsigned int pos)
@@ -184,6 +198,12 @@ namespace AuroraFW {
 		AudioSource* AudioStream::getAudioSource()
 		{
 			return _audioSource;
+		}
+
+		void AudioStream::setAudioSource(const AudioSource& audioSource)
+		{
+			delete _audioSource;
+			_audioSource = new AudioSource(audioSource);
 		}
 	}
 }
