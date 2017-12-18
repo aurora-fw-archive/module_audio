@@ -24,6 +24,7 @@
 #include <AuroraFW/STDL/STL/IOStream.h>
 #include <AuroraFW/Core/Debug.h>
 #include <AuroraFW/CLI/Log.h>
+#include <AuroraFW/Math/Vector3D.h>
 
 // PortAudio
 #include <portaudio.h>
@@ -35,11 +36,18 @@ namespace AuroraFW {
 	namespace AudioManager {
 		class PAErrorException: public std::exception
 		{
-		private:
-			const std::string _paError;
-		public:
-			PAErrorException(const PaError& );
-			virtual const char* what() const throw();
+			private:
+				const std::string _paError;
+			public:
+				PAErrorException(const PaError& );
+				virtual const char* what() const throw();
+		};
+
+		class AudioNotInitializedException: public std::exception
+		{
+			public:
+				AudioNotInitializedException() {};
+				virtual const char* what() const throw();
 		};
 
 		struct AFW_EXPORT AudioDevice {
@@ -65,6 +73,24 @@ namespace AuroraFW {
 
 		private:
 			const PaDeviceInfo *_deviceInfo;
+		};
+
+		class AFW_EXPORT AudioListener {
+			private:
+				static AudioListener *_instance;
+				AudioListener() {};
+
+				static void start();
+				static void stop();
+			public:
+				friend struct AudioBackend;
+
+				~AudioListener() {};
+
+				static AudioListener& getInstance();
+
+				Math::Vector3D position;
+				Math::Vector3D direction = Math::Vector3D(0.0f, 0.0f, -1.0f);
 		};
 
 		class AFW_EXPORT AudioBackend {

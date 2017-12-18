@@ -22,7 +22,6 @@
 // AuroraFW
 #include <AuroraFW/Global.h>
 #include <AuroraFW/Audio/AudioBackend.h>
-#include <AuroraFW/Math/Vector3D.h>
 
 // LibSNDFile
 #include <sndfile.h>
@@ -62,13 +61,18 @@ namespace AuroraFW {
 			AudioSource(const float = 0 , const float = 0 , const float = 0);
 			AudioSource(const AudioSource& );
 
-			void setAudioFalloutType(const AudioFallout );
-
 			AudioFallout falloutType;
 
-			Math::Vector3D position;
+			void setPosition(Math::Vector3D );
+			const float getPanning();
+			const Math::Vector3D getPosition();
+
 			float medDistance;
 			float maxDistance;
+		private:
+			void calculateValues();
+			Math::Vector3D _position;
+			float _pan;
 		};
 
 		struct AFW_EXPORT AudioStream {

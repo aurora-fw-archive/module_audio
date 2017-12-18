@@ -30,6 +30,32 @@ namespace AuroraFW {
 			return _paError.c_str();
 		}
 
+		// AudioNotInitializedException
+		const char* AudioNotInitializedException::what() const throw()
+		{
+			return "The AudioBackend was not initialized yet!";
+		}
+
+		// AudioListener
+		AudioListener* AudioListener::_instance = nullptr;
+
+		void AudioListener::start()
+		{
+			_instance = new AudioListener();
+		}
+
+		void AudioListener::stop()
+		{
+			delete _instance;
+		}
+
+		AudioListener& AudioListener::getInstance()
+		{
+			if(_instance == nullptr)
+				throw AudioNotInitializedException();
+			return *_instance;
+		}
+
 		// AudioDevice
 		AudioDevice::AudioDevice()
 			: _deviceInfo(Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice())) {}
@@ -161,10 +187,15 @@ namespace AuroraFW {
 		// TODO: Subject to change, plan changes well and revisit later
 		void AudioBackend::start()
 		{
-			if(_instance == nullptr)
+			// Starts the instance if it's not initialized yet
+			if(_instance == nullptr) {
 				_instance = new AudioBackend();
-			else
+
+				// Calls AudioListener's private start method
+				AudioListener::start();
+			} else {
 				CLI::Log(CLI::Warning, "The AudioBackend was already initialized. This method shouldn't be called twice!");
+			}
 		}
 
 		AudioBackend* AudioBackend::_instance = nullptr;
@@ -172,7 +203,7 @@ namespace AuroraFW {
 		AudioBackend& AudioBackend::getInstance()
 		{
 			if(_instance == nullptr)
-				_instance = new AudioBackend();
+				throw AudioNotInitializedException();
 			return *_instance;
 		}
 
@@ -187,10 +218,13 @@ namespace AuroraFW {
 				delete _instance;
 				_instance = nullptr;
 
+				// Terminates AudioListener
+				AudioListener::stop();
+
 				// Prints verbose
 				AuroraFW::Debug::Log("AudioBackend was terminated.");
 			} else {
-				CLI::Log(CLI::Warning, "The AudioBackEnd was already terminated. This method shouldn't be called twice!");
+				CLI::Log(CLI::Warning, "The AudioBackend was already terminated. This method shouldn't be called twice!");
 			}
 		}
 

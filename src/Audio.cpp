@@ -17,7 +17,6 @@
 ****************************************************************************/
 
 #include <AuroraFW/Audio/Audio.h>
-#include <iostream>
 
 namespace AuroraFW {
 	namespace AudioManager {
@@ -53,7 +52,21 @@ namespace AuroraFW {
 			for(unsigned int i = 0; i < readFrames; i++) {
 				// Applies the volume to all channels the sound might have
 				for(uint8_t channels = 0; channels < audioStream->_sndInfo.channels; channels++) {
-					*output++ = *output * audioStream->volume;
+					float frame = *output;
+					
+					// In case there's 3D audio, calculates 3D audio
+					if(audioStream->_audioSource != nullptr) {
+						AudioSource* source = audioStream->_audioSource;
+						const float panning = source->getPanning();
+						if(channels == 0)
+							frame *= (0.5f * panning + 0.5f);
+						else if(channels == 1)
+							frame *= (-0.5f * panning + 0.5f);
+					}
+
+					frame *= audioStream->volume;
+
+					*output++ = frame;
 				}
 			}
 
@@ -95,14 +108,57 @@ namespace AuroraFW {
 
 		// AudioSource
 		AudioSource::AudioSource(const Math::Vector3D vec)
-			: position(vec) {}
+			: _position(vec) {calculateValues();}
 
 		AudioSource::AudioSource(const float x, const float y, const float z)
-			: position(Math::Vector3D(x, y, z)) {}
+			: _position(Math::Vector3D(x, y, z)) {calculateValues();}
 		
 		AudioSource::AudioSource(const AudioSource& audioSource)
-			: falloutType(audioSource.falloutType), position(audioSource.position),
-				medDistance(audioSource.medDistance), maxDistance(audioSource.maxDistance) {}
+			: falloutType(audioSource.falloutType), _position(audioSource._position),
+				medDistance(audioSource.medDistance), maxDistance(audioSource.maxDistance) {calculateValues();}
+
+		void AudioSource::setPosition(Math::Vector3D position)
+		{
+			_position = position;
+			calculateValues();
+		}
+
+		const Math::Vector3D AudioSource::getPosition()
+		{
+			return _position;
+		}
+
+		const float AudioSource::getPanning()
+		{
+			return _pan;
+		}
+
+		void AudioSource::calculateValues()
+		{
+			Math::Vector3D listenerPos = AudioListener::getInstance().position;
+			Math::Vector3D listenerDir = AudioListener::getInstance().direction;
+			// TODO: Right now it's hardcoded because the camera, under normal circunstances,
+			//	doesn't "tilt". Make less dirty later
+			Math::Vector3D listenerUp = Math::Vector3D(0, 1, 0);
+			// FIXME: The method to obtain the perpendicular to both dir and lookUp didn't use matrixes
+			// , because I am inexperienced on it. This is where I got the formula:
+			// https://math.stackexchange.com/questions/501949/determining-a-perpendicular-vector-to-two-given-vectors
+			// however, this is dirty and should be cleaned up
+			float x = listenerDir.y * listenerUp.z - listenerDir.z * listenerUp.y;
+			
+			float y = -(listenerDir.x * listenerUp.z - listenerDir.z * listenerUp.x);
+
+			float z = listenerDir.x * listenerUp.y - listenerDir.y * listenerUp.x;
+
+			Math::Vector3D cross = Math::Vector3D(x, y, z);
+			cross.normalize();
+
+			// Makes a copy of position, since it needs to be manipulated to calculate the panning
+			Math::Vector3D sourcePos = _position;
+			sourcePos -= listenerPos;
+
+			_pan = cross.dot(sourcePos.normalized());
+		}
 	
 		// AudioStream
 		AudioStream::AudioStream(const char *path, const AudioDevice& device, AudioSource *audioSource)
