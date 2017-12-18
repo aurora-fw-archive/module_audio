@@ -59,9 +59,9 @@ namespace AuroraFW {
 						AudioSource* source = audioStream->_audioSource;
 						const float panning = source->getPanning();
 						if(channels == 0)
-							frame *= (0.5f * panning + 0.5f);
-						else if(channels == 1)
 							frame *= (-0.5f * panning + 0.5f);
+						else if(channels == 1)
+							frame *= (0.5f * panning + 0.5f);
 					}
 
 					frame *= audioStream->volume;
