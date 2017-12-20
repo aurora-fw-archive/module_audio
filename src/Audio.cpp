@@ -146,7 +146,7 @@ namespace AuroraFW {
 			// however, this is dirty and should be cleaned up
 			float x = listenerDir.y * listenerUp.z - listenerDir.z * listenerUp.y;
 			
-			float y = -(listenerDir.x * listenerUp.z - listenerDir.z * listenerUp.x);
+			float y = listenerDir.z * listenerUp.x - listenerDir.x * listenerUp.z;
 
 			float z = listenerDir.x * listenerUp.y - listenerDir.y * listenerUp.x;
 

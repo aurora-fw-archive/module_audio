@@ -90,7 +90,7 @@ namespace AuroraFW {
 				static AudioListener& getInstance();
 
 				Math::Vector3D position;
-				Math::Vector3D direction = Math::Vector3D(0.0f, 0.0f, -1.0f);
+				Math::Vector3D direction = Math::Vector3D(0, 0, -1);
 		};
 
 		class AFW_EXPORT AudioBackend {
