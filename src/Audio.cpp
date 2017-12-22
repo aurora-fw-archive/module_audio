@@ -114,11 +114,11 @@ namespace AuroraFW {
 		}
 
 		AudioSource::AudioSource(const float x, const float y, const float z)
-			: _position(Math::Vector3D(x, y, z)) 
+			: _position(Math::Vector3D(x, y, z))
 		{
 			calculateValues();
 		}
-		
+
 		AudioSource::AudioSource(const AudioSource& audioSource)
 			: falloutType(audioSource.falloutType), _position(audioSource._position),
 				medDistance(audioSource.medDistance), maxDistance(audioSource.maxDistance)
@@ -154,9 +154,7 @@ namespace AuroraFW {
 			// https://math.stackexchange.com/questions/501949/determining-a-perpendicular-vector-to-two-given-vectors
 			// however, this is dirty and should be cleaned up
 			float x = listenerDir.y * listenerUp.z - listenerDir.z * listenerUp.y;
-			
 			float y = listenerDir.z * listenerUp.x - listenerDir.x * listenerUp.z;
-
 			float z = listenerDir.x * listenerUp.y - listenerDir.y * listenerUp.x;
 
 			Math::Vector3D cross = Math::Vector3D(x, y, z);
@@ -177,7 +175,7 @@ namespace AuroraFW {
 			if(path == nullptr || std::string(path) == "") {
 				AuroraFW::Debug::Log("Debug mode activated for AudioStream instance");
 				getPAError(Pa_OpenDefaultStream(&_paStream, 0, 2, paUInt8,
-											device.getDefaultSampleRate(), 256, debugCallback, NULL));
+					device.getDefaultSampleRate(), 256, debugCallback, NULL));
 			} else {
 				// Gets the SNDFILE* from libsndfile
 				_sndInfo.format = 0;
@@ -190,7 +188,7 @@ namespace AuroraFW {
 
 				// Opens the audio stream
 				getPAError(Pa_OpenDefaultStream(&_paStream, 0, _sndInfo.channels, paInt32,
-												device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioCallback, this));
+					device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioCallback, this));
 			}
 		}
 
