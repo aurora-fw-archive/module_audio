@@ -108,14 +108,23 @@ namespace AuroraFW {
 
 		// AudioSource
 		AudioSource::AudioSource(const Math::Vector3D vec)
-			: _position(vec) {calculateValues();}
+			: _position(vec)
+		{
+			calculateValues();
+		}
 
 		AudioSource::AudioSource(const float x, const float y, const float z)
-			: _position(Math::Vector3D(x, y, z)) {calculateValues();}
+			: _position(Math::Vector3D(x, y, z)) 
+		{
+			calculateValues();
+		}
 		
 		AudioSource::AudioSource(const AudioSource& audioSource)
 			: falloutType(audioSource.falloutType), _position(audioSource._position),
-				medDistance(audioSource.medDistance), maxDistance(audioSource.maxDistance) {calculateValues();}
+				medDistance(audioSource.medDistance), maxDistance(audioSource.maxDistance)
+		{
+			calculateValues();
+		}
 
 		void AudioSource::setPosition(Math::Vector3D position)
 		{
