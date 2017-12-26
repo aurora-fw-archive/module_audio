@@ -34,15 +34,18 @@ namespace AuroraFW {
 		};
 
 		enum class AudioLoopMode {
+			Once,
+			Reverse,
 			Repeat,
-			PingPong
+			PingPong,
 		};
 
 		enum class AudioStatus {
 			Play,
 			Pause,
 			Stop,
-			CallbackStop
+			CallbackStop,
+			CallbackReverse
 		};
 
 		class AudioFileNotFound: public std::exception
@@ -57,8 +60,9 @@ namespace AuroraFW {
 		
 
 		struct AFW_EXPORT AudioSource {
-			AudioSource(const Math::Vector3D = Math::Vector3D());
-			AudioSource(const float = 0 , const float = 0 , const float = 0);
+			AudioSource();
+			AudioSource(const Math::Vector3D);
+			AudioSource(const float , const float , const float );
 			AudioSource(const AudioSource& );
 
 			AudioFallout falloutType;
@@ -79,7 +83,8 @@ namespace AuroraFW {
 			friend struct AudioSource;
 			friend int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
-			AudioStream(const char* = nullptr, const AudioDevice& = AudioDevice(), AudioSource* = nullptr);
+			AudioStream();
+			AudioStream(const char* , AudioSource* = nullptr);
 			~AudioStream();
 
 			void play();
@@ -93,15 +98,16 @@ namespace AuroraFW {
 			void setStreamPos(unsigned int );
 			void setStreamPosFrame(unsigned int );
 
-			void setLooping(bool );
-
 			AudioSource* getAudioSource();
 			void setAudioSource(const AudioSource& );
+
+			const float getNumLoops();
 			
 			AudioLoopMode audioLoopMode;
 
 			float volume = 1;
 			float pitch = 1;
+			
 		private:
 			SNDFILE *_soundFile = nullptr;
 			SF_INFO _sndInfo;
@@ -109,7 +115,7 @@ namespace AuroraFW {
 
 			AudioStatus _audioStatus = AudioStatus::Stop;
 			unsigned int _streamPosFrame = 0;
-			bool _looping = false;
+			float _loops = 0;
 			
 			AudioSource *_audioSource;
 		};
@@ -117,6 +123,12 @@ namespace AuroraFW {
 		int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 		int debugCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+
+		// Inline definitions
+		inline const float AudioStream::getNumLoops()
+		{
+			return _loops;
+		}
 	}
 }
 

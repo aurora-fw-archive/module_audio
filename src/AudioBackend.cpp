@@ -262,5 +262,15 @@ namespace AuroraFW {
 
 			return audioDevices;
 		}
+
+		void AudioBackend::setInputDevice(const AudioDevice device)
+		{
+			// TODO: Implement later
+		}
+
+		void AudioBackend::setOutputDevice(const AudioDevice device)
+		{
+			// TODO: Implement later
+		}
 	}
 }

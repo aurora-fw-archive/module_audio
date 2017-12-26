@@ -122,9 +122,9 @@ namespace AuroraFW {
 			void setInputDevice(AudioDevice );
 			void setOutputDevice(AudioDevice );
 
-			const int getNumDevices();
-			const int getNumOutputDevices();
-			const int getNumInputDevices();
+			int getNumDevices();
+			int getNumOutputDevices();
+			int getNumInputDevices();
 		};
 
 		// Inline definitions
@@ -139,17 +139,17 @@ namespace AuroraFW {
 			return Pa_GetDeviceCount();
 		}
 
-		inline const int AudioBackend::getNumDevices()
+		inline int AudioBackend::getNumDevices()
 		{
 			return numDevices;
 		}
 
-		inline const int AudioBackend::getNumOutputDevices()
+		inline int AudioBackend::getNumOutputDevices()
 		{
 			return numOutputDevices;
 		}
 		
-		inline const int AudioBackend::getNumInputDevices()
+		inline int AudioBackend::getNumInputDevices()
 		{
 			return numInputDevices;
 		}

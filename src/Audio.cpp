@@ -48,6 +48,9 @@ namespace AuroraFW {
 			// Reads the frames from music file (fills the buffer basically)
 			int readFrames = sf_readf_int(audioStream->_soundFile, output, framesPerBuffer);
 
+			// Plays in reverse if the user wants to
+			//if(audioStream->)
+
 			// Adjusts the volume of each frame
 			for(unsigned int i = 0; i < readFrames; i++) {
 				// Applies the volume to all channels the sound might have
@@ -73,10 +76,19 @@ namespace AuroraFW {
 			// If the read frames filled the buffer to read, continues playing
 			if(readFrames == framesPerBuffer) {
 				return paContinue;
-			// Else it means it reached end of file. Stops the callback.
+			// Else it means it reached end of file.
 			} else {
-				audioStream->_audioStatus = AudioStatus::CallbackStop;
-				return paComplete;
+				// If the song should be played once, stop the callback
+				if(audioStream->audioLoopMode == AudioLoopMode::Once) {
+					audioStream->_audioStatus = AudioStatus::CallbackStop;
+					return paComplete;
+				// Else if the song should be repeated, do so
+				} else if(audioStream->audioLoopMode == AudioLoopMode::Repeat) {
+					audioStream->_streamPosFrame = 0;
+					audioStream->_loops++;
+					sf_seek(audioStream->_soundFile, 0, SEEK_SET);
+					return paContinue;
+				}
 			}
 		}
 
@@ -107,6 +119,12 @@ namespace AuroraFW {
 		}
 
 		// AudioSource
+		AudioSource::AudioSource()
+			: _position(Math::Vector3D())
+		{
+			calculateValues();
+		}
+
 		AudioSource::AudioSource(const Math::Vector3D vec)
 			: _position(vec)
 		{
@@ -168,28 +186,34 @@ namespace AuroraFW {
 		}
 	
 		// AudioStream
-		AudioStream::AudioStream(const char *path, const AudioDevice& device, AudioSource *audioSource)
+		AudioStream::AudioStream()
+			: _audioSource(nullptr)
+		{
+			AuroraFW::Debug::Log("Debug mode activated for AudioStream instance");
+
+			AudioDevice device;
+
+			getPAError(Pa_OpenDefaultStream(&_paStream, 0, 2, paUInt8,
+				device.getDefaultSampleRate(), 256, debugCallback, NULL));
+		}
+
+		AudioStream::AudioStream(const char *path, AudioSource *audioSource)
 			: _audioSource(audioSource)
 		{
-			// If path is null, run the debug callback
-			if(path == nullptr || std::string(path) == "") {
-				AuroraFW::Debug::Log("Debug mode activated for AudioStream instance");
-				getPAError(Pa_OpenDefaultStream(&_paStream, 0, 2, paUInt8,
-					device.getDefaultSampleRate(), 256, debugCallback, NULL));
-			} else {
-				// Gets the SNDFILE* from libsndfile
-				_sndInfo.format = 0;
+			// Gets the SNDFILE* from libsndfile
+			_sndInfo.format = 0;
 
-				_soundFile = sf_open(path, SFM_READ, &_sndInfo);
+			_soundFile = sf_open(path, SFM_READ, &_sndInfo);
 
-				// If the soundFile is null, it means there was no audio file
-				if(_soundFile == nullptr)
-					throw AudioFileNotFound(path);
+			// If the soundFile is null, it means there was no audio file
+			if(_soundFile == nullptr)
+				throw AudioFileNotFound(path);
 
-				// Opens the audio stream
-				getPAError(Pa_OpenDefaultStream(&_paStream, 0, _sndInfo.channels, paInt32,
-					device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioCallback, this));
-			}
+			AudioDevice device;
+
+			// Opens the audio stream
+			getPAError(Pa_OpenDefaultStream(&_paStream, 0, _sndInfo.channels, paInt32,
+				device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioCallback, this));
 		}
 
 		AudioStream::~AudioStream()
@@ -251,11 +275,6 @@ namespace AuroraFW {
 		void AudioStream::setStreamPosFrame(unsigned int pos)
 		{
 			_streamPosFrame = pos;
-		}
-
-		void AudioStream::setLooping(bool looping)
-		{
-			_looping = looping;
 		}
 
 		AudioSource* AudioStream::getAudioSource()
