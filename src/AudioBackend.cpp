@@ -272,5 +272,16 @@ namespace AuroraFW {
 		{
 			// TODO: Implement later
 		}
+
+		int AudioBackend::calcNumDevices()
+		{
+			return Pa_GetDeviceCount();
+		}
+
+		void getPAError(const PaError& error)
+		{
+			if(error != paNoError)
+				throw PAErrorException(error);
+		}
 	}
 }

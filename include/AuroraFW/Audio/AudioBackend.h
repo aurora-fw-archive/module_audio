@@ -34,7 +34,7 @@
 
 namespace AuroraFW {
 	namespace AudioManager {
-		class PAErrorException: public std::exception
+		class AFW_EXPORT PAErrorException : public std::exception
 		{
 			private:
 				const std::string _paError;
@@ -43,7 +43,7 @@ namespace AuroraFW {
 				virtual const char* what() const throw();
 		};
 
-		class AudioNotInitializedException: public std::exception
+		class AFW_EXPORT AudioNotInitializedException : public std::exception
 		{
 			public:
 				AudioNotInitializedException() {};
@@ -127,18 +127,9 @@ namespace AuroraFW {
 			int getNumInputDevices();
 		};
 
+		AFW_EXPORT void getPAError(const PaError &error);
+
 		// Inline definitions
-		inline void getPAError(const PaError& error)
-		{
-			if(error != paNoError)
-				throw PAErrorException(error);
-		}
-
-		inline int AudioBackend::calcNumDevices()
-		{
-			return Pa_GetDeviceCount();
-		}
-
 		inline int AudioBackend::getNumDevices()
 		{
 			return numDevices;
