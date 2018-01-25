@@ -14,8 +14,17 @@
 # ensure the GNU Lesser General Public License version 3 requirements
 # will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
 
+
+*.c			text eol=lf
+*.cpp		text eol=lf
+*.h			text eol=lf
+*.txt		text
+*.sh		text eol=lf
+*.jpg		-text
+
 # Set the default behavior, in case people don't have core.autocrlf set.
-* text eol=lf
+*			text=auto
 
 # Declare files that will always have CRLF line endings on checkout.
-*.sln text eol=crlf
+*.vcproj	text eol=crlf
+*.sln		text eol=crlf
