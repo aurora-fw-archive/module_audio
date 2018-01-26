@@ -22,6 +22,7 @@
 // AuroraFW
 #include <AuroraFW/Global.h>
 #include <AuroraFW/Audio/AudioBackend.h>
+#include <AuroraFW/Math/Algorithm.h>
 
 // LibSNDFile
 #include <sndfile.h>
@@ -33,22 +34,20 @@ namespace AuroraFW {
 			Exponencial
 		};
 
-		enum class AudioLoopMode {
+		enum class AudioPlayMode {
 			Once,
-			Reverse,
-			Repeat,
-			PingPong,
+			Loop,
 		};
 
 		enum class AudioStatus {
 			Play,
 			Pause,
 			Stop,
-			CallbackStop,
-			CallbackReverse
+			// FIXME: This value should be internal to AuroraFW, find a solution so users don't mess with it
+			CallbackStop
 		};
 
-		class AFW_EXPORT AudioFileNotFound : public std::exception
+		class AudioFileNotFound: public std::exception
 		{
 		private:
 			const std::string _errorMessage;
@@ -68,24 +67,37 @@ namespace AuroraFW {
 			AudioFallout falloutType;
 
 			void setPosition(Math::Vector3D );
-			const float getPanning();
-			const Math::Vector3D getPosition();
+			void setMedDistance(float );
+			void setMaxDistance(float );
 
-			float medDistance;
-			float maxDistance;
-		private:
+			const float getPanning();
+			const float getStrength();
+
+			const Math::Vector3D getPosition();
+			const float getMedDistance();
+			const float getMaxDistance();
+
 			void calculateValues();
+
+		private:
+			void _calculatePan();
+			void _calculateStrength();
+
 			Math::Vector3D _position;
-			float _pan;
+			float _medDistance;
+			float _maxDistance;
+
+			float _strength = 1;
+			float _pan = 0;
 		};
 
-		struct AFW_EXPORT AudioStream {
+		struct AFW_EXPORT AudioOStream {
 			friend struct AudioSource;
 			friend int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
-			AudioStream();
-			AudioStream(const char* , AudioSource* = nullptr);
-			~AudioStream();
+			AudioOStream();
+			AudioOStream(const char* , AudioSource* = nullptr);
+			~AudioOStream();
 
 			void play();
 			void pause();
@@ -102,12 +114,12 @@ namespace AuroraFW {
 			void setAudioSource(const AudioSource& );
 
 			const float getNumLoops();
-			
-			AudioLoopMode audioLoopMode;
+
+			AudioPlayMode audioPlayMode;
 
 			float volume = 1;
 			float pitch = 1;
-			
+
 		private:
 			SNDFILE *_soundFile = nullptr;
 			SF_INFO _sndInfo;
@@ -115,7 +127,7 @@ namespace AuroraFW {
 
 			AudioStatus _audioStatus = AudioStatus::Stop;
 			unsigned int _streamPosFrame = 0;
-			float _loops = 0;
+			uint8_t _loops = 0;
 			
 			AudioSource *_audioSource;
 		};
@@ -125,7 +137,7 @@ namespace AuroraFW {
 		int debugCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 		// Inline definitions
-		inline const float AudioStream::getNumLoops()
+		inline const float AudioOStream::getNumLoops()
 		{
 			return _loops;
 		}

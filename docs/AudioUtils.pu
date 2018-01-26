@@ -1,0 +1,51 @@
+@startuml
+skinparam roundCorner 20
+
+skinparam class {
+	backgroundColor LightGray
+	borderColor Black
+}
+
+!definelong exception(name, type = "T")
+class name <<(E,firebrick) exception>> #FCC {
+	+ name(const type)
+	..
+	+ {abstract} const type what() const throw()
+	--
+	- const type
+}
+!enddefinelong
+
+title Structure of AudioUtils classes
+
+class AudioInfo {
+	.. Constructor/Destructor ..
+	+ AudioInfo(AudioIStream)
+	+ AudioInfo(AudioOStream )
+
+	.. Audio Info Functions ..
+	+ const char* getTitle() const
+	+ const char* getCopyright() const
+	+ const char* getSoftware() const
+	+ const char* getArtist() const
+	+ const char* getComment() const
+	+ const char* getDate() const
+	+ const char* getAlbum() const
+	+ const char* getLicense() const
+	+ const char* getTrackNumber() const
+	+ const char* getGenre() const
+
+	+ void setTitle(const char* title)
+	+ void setCopyright(const char* copyright)
+	+ void setSoftware(const char* software)
+	+ void setArtist(const char* artist)
+	+ void setComment(const char* comment)
+	+ void setDate(const char* date)
+	+ void setAlbum(const char* album)
+	+ void setLicense(const char* license)
+	+ void setTrackNumber(const char* trackNumber)
+	+ void setGenre(const char* genre)
+
+}
+
+@enduml

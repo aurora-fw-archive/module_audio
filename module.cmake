@@ -30,6 +30,6 @@ if(AURORA_PCH)
 	add_precompiled_header(aurorafw-audio "${AURORAFW_MODULE_AUDIO_HEADERS}")
 endif()
 
-target_link_libraries(aurorafw-audio aurorafw-core aurorafw-cli portaudio sndfile)
+target_link_libraries(aurorafw-audio aurorafw-core aurorafw-cli aurorafw-math portaudio sndfile)
 
 set_target_properties(aurorafw-audio PROPERTIES OUTPUT_NAME aurorafw-audio)
