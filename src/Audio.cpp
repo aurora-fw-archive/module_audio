@@ -329,7 +329,6 @@ namespace AuroraFW {
 			return _audioSource;
 		}
 
-
 		void AudioOStream::setAudioSource(const AudioSource& audioSource)
 		{
 			delete _audioSource;
