@@ -1,0 +1,63 @@
+@startuml
+skinparam roundCorner 20
+
+skinparam class {
+	backgroundColor LightGray
+	borderColor Black
+}
+
+!definelong exception(name, type = "T")
+class name <<(E,firebrick) exception>> #FCC {
+	+ name(const type)
+	..
+	+ {abstract} const type what() const throw()
+	--
+	- const type
+}
+!enddefinelong
+
+title Structure of AudioUtils classes
+
+class AudioInfo {
+	.. Constructor/Destructor ..
+	+ AudioInfo()
+	+ AudioInfo(AudioOStream )
+	+ ~AudioInfo()
+
+	.. Audio Metadata Functions ..
+	+ const unsigned int getSampleRate() const
+	+ const unsigned long getFrames() const
+	+ const int getChannels() const
+	+ const int getFormat() const
+
+	+ void setSampleRate(const unsigned int sampleRate)
+	+ void setFrames(const unsigned long frames)
+	+ void setChannels(const int channels)
+	+ void setFormat(cont int format)
+
+	.. Audio Info Functions ..
+	+ const char* getTitle() const
+	+ const char* getCopyright() const
+	+ const char* getSoftware() const
+	+ const char* getArtist() const
+	+ const char* getComment() const
+	+ const char* getDate() const
+	+ const char* getAlbum() const
+	+ const char* getLicense() const
+	+ const char* getTrackNumber() const
+	+ const char* getGenre() const
+
+	+ void setTitle(const char* title)
+	+ void setCopyright(const char* copyright)
+	+ void setSoftware(const char* software)
+	+ void setArtist(const char* artist)
+	+ void setComment(const char* comment)
+	+ void setDate(const char* date)
+	+ void setAlbum(const char* album)
+	+ void setLicense(const char* license)
+	+ void setTrackNumber(const char* trackNumber)
+	+ void setGenre(const char* genre)
+
+}
+
+@enduml

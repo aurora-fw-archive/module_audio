@@ -1,0 +1,115 @@
+@startuml
+skinparam roundCorner 20
+
+skinparam class {
+	backgroundColor LightGray
+	borderColor Black
+}
+
+!definelong exception(name, type = "T")
+class name <<(E,firebrick) exception>> #FCC {
+	+ name(const type)
+	..
+	+ {abstract} const type what() const throw()
+	--
+	- const type
+}
+!enddefinelong
+
+title Structure of Audio classes
+
+class AudioOStream {
+    .. Constructor/Destructor ..
+    + AudioOStream(const char *path, AudioSource*)
+    + ~AudioOStream()
+
+    .. Playback Functions ..
+    + void play()
+    + void pause()
+    + void stop()
+
+    + bool isPlaying()
+    + bool isPaused()
+    + bool isStopped()
+
+    .. Audio Settings Functions ..
+    + void setStreamPos(unsigned int miliseconds)
+    + void setStreamPosFrame(unsigned int frame)
+
+    + AudioSource* getAudioSource()
+    + void setAudioSource(const AudioSource& audioSource)
+
+    + const float getNumLoops()
+    --
+    + AudioPlayMode AudioPlayMode
+
+    + float volume = 1
+    + float pitch = 1
+}
+
+class AudioIStream {
+    .. Constructor/Destructor ..
+    + AudioIStream(const char *path, unsigned int samplerate, unsigned int frames, uint_8t channels)
+    + ~AudioIStream()
+
+    .. Recording Functions ..
+    + void record()
+    + void pause()
+    + void stop()
+
+    + bool isRecording()
+    + bool isPaused()
+    + bool isStopped()
+    + bool isBufferFull()
+
+    .. Audio Settings Functions ..
+    + void clearBuffer()
+    + void clearBuffer(unsigned int start, unsigned int finish)
+
+    + bool save()
+    --
+    + const char* path
+    + float* buffer = new float[frames]
+}
+
+class AudioSource {
+    .. Constructor/Destructor ..
+    + AudioSource()
+    + AudioSource(const Math::Vector3D position)
+    + AudioSource(const float x, const float y, const float z)
+    + AudioSource(const AudioSource& audioSource)
+    + ~AudioSource()
+
+    .. 3D Space Functions ..
+    + void setPosition(Math::Vector3D position)
+    + void setMedDistance(float medDistance)
+    + void setMaxDistance(float maxDistance)
+
+    + const Math::Vector3D getPosition()
+    + const float getMedDistance()
+    + const float getMaxDistance()
+
+    + void calculateValues()
+    + const float getPanning()
+    + const float getStrength()
+}
+
+enum AudioFallout {
+    + Linear
+    + Exponencial
+}
+
+enum AudioPlayMode {
+    + Once
+    + Loop
+}
+
+enum AudioStatus {
+    + Play
+    + Pause
+    + Stop
+    + CallbackStop
+}
+
+exception(AudioFileNotFoundException, string)
+@enduml
