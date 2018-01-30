@@ -25,11 +25,13 @@
 // LibSNDFile
 #include <sndfile.h>
 
-namespace AurroaFW {
+namespace AuroraFW {
 	namespace AudioManager {
 		struct AFW_EXPORT AudioInfo {
-			AudioInfo();
-			AudioInfo(AudioOStream );
+			friend struct AudioOStream;
+			friend struct AudioIStream;
+
+			AudioInfo(SF_INFO* = nullptr, SNDFILE* = nullptr);
 			~AudioInfo();
 
 			const unsigned int getSampleRate() const;
@@ -63,6 +65,10 @@ namespace AurroaFW {
 			void setLicense(const char* license);
 			void setTrackNumber(const char* trackNumber);
 			void setGenre(const char* genre);
+		
+		private:
+			SF_INFO* _sndInfo;
+			SNDFILE* _sndFile;
 		};
 	}
 }

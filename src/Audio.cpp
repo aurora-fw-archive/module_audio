@@ -239,7 +239,7 @@ namespace AuroraFW {
 
 			AudioDevice device;
 
-			getPAError(Pa_OpenDefaultStream(&_paStream, 0, 2, paUInt8,
+			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, 2, paUInt8,
 				device.getDefaultSampleRate(), 256, debugCallback, NULL));
 		}
 
@@ -258,7 +258,7 @@ namespace AuroraFW {
 			AudioDevice device;
 
 			// Opens the audio stream
-			getPAError(Pa_OpenDefaultStream(&_paStream, 0, _sndInfo.channels, paInt32,
+			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, _sndInfo.channels, paInt32,
 				device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioOutputCallback, this));
 		}
 
@@ -277,11 +277,11 @@ namespace AuroraFW {
 			if(_audioStatus == AudioStatus::CallbackStop)
 				stop();
 			else if(_audioStatus == AudioStatus::Pause)
-				getPAError(Pa_StopStream(_paStream));
+				catchPAProblem(Pa_StopStream(_paStream));
 			
 			_audioStatus = AudioStatus::Play;
 			sf_seek(_soundFile, _streamPosFrame, SF_SEEK_SET);
-			getPAError(Pa_StartStream(_paStream));
+			catchPAProblem(Pa_StartStream(_paStream));
 		}
 
 		void AudioOStream::pause()
@@ -296,7 +296,7 @@ namespace AuroraFW {
 			_streamPosFrame = 0;
 			
 			_audioStatus = AudioStatus::Stop;
-			getPAError(Pa_StopStream(_paStream));
+			catchPAProblem(Pa_StopStream(_paStream));
 		}
 
 		bool AudioOStream::isPlaying()
