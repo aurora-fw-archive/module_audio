@@ -22,6 +22,7 @@
 // AuroraFW
 #include <AuroraFW/Global.h>
 #include <AuroraFW/Audio/AudioBackend.h>
+#include <AuroraFW/Audio/AudioUtils.h>
 #include <AuroraFW/Math/Algorithm.h>
 
 // LibSNDFile
@@ -55,8 +56,6 @@ namespace AuroraFW {
 			AudioFileNotFound(const char* );
 			virtual const char* what() const throw();
 		};
-
-		
 
 		struct AFW_EXPORT AudioSource {
 			AudioSource();
@@ -116,13 +115,13 @@ namespace AuroraFW {
 			const float getNumLoops();
 
 			AudioPlayMode audioPlayMode;
+			AudioInfo audioInfo;
 
 			float volume = 1;
 			float pitch = 1;
 
 		private:
 			SNDFILE *_soundFile = nullptr;
-			SF_INFO _sndInfo;
 			PaStream *_paStream;
 
 			AudioStatus _audioStatus = AudioStatus::Stop;

@@ -38,6 +38,7 @@ namespace AuroraFW {
 			// Gets the output buffer (it's of type paInt32)
 			int* output = (int*)outputBuffer;
 			AudioOStream *audioOStream = (AudioOStream*)userData;
+			AudioInfo *audioInfo = &(audioOStream->audioInfo);
 
 			// In case the audio stream is paused, saves the current position and stops the stream
 			if(audioOStream->_audioStatus == AudioStatus::Pause) {
@@ -51,7 +52,7 @@ namespace AuroraFW {
 			// Adjusts the volume of each frame
 			for(unsigned int i = 0; i < readFrames; i++) {
 				// Applies the volume to all channels the sound might have
-				for(uint8_t channels = 0; channels < audioOStream->_sndInfo.channels; channels++) {
+				for(uint8_t channels = 0; channels < audioInfo->getChannels(); channels++) {
 					float frame = *output;
 					
 					// In case there's 3D audio, calculates 3D audio
@@ -96,7 +97,7 @@ namespace AuroraFW {
 						unsigned long int framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
 						PaStreamCallbackFlags statusFlags, void *userData)
 		{
-
+			// TODO: Implement
 		}
 
 		// debugCallBack
@@ -244,12 +245,14 @@ namespace AuroraFW {
 		}
 
 		AudioOStream::AudioOStream(const char *path, AudioSource *audioSource)
-			: _audioSource(audioSource)
+			: audioInfo(nullptr, nullptr), _audioSource(audioSource)
 		{
-			// Gets the SNDFILE* from libsndfile
-			_sndInfo.format = 0;
+			SF_INFO* sndInfo = new SF_INFO();
+			sndInfo->format = 0;
 
-			_soundFile = sf_open(path, SFM_READ, &_sndInfo);
+			audioInfo._sndInfo = sndInfo;
+			_soundFile = sf_open(path, SFM_READ, audioInfo._sndInfo);
+			audioInfo._sndFile = _soundFile;
 
 			// If the soundFile is null, it means there was no audio file
 			if(_soundFile == nullptr)
@@ -258,7 +261,7 @@ namespace AuroraFW {
 			AudioDevice device;
 
 			// Opens the audio stream
-			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, _sndInfo.channels, paInt32,
+			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, audioInfo.getChannels(), paInt32,
 				device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioOutputCallback, this));
 		}
 
@@ -266,7 +269,7 @@ namespace AuroraFW {
 		{
 			// Closes the soundFile
 			if(_soundFile != nullptr)
-				sf_close(_soundFile);
+				catchSNDFILEProblem(sf_close(_soundFile));
 
 			// Deletes audioSource
 			delete _audioSource;
