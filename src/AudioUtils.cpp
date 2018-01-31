@@ -73,52 +73,62 @@ namespace AuroraFW {
 
 		const char* AudioInfo::getTitle() const
 		{
-			return sf_get_string(_sndFile, SF_STR_TITLE);
+			const char* string = sf_get_string(_sndFile, SF_STR_TITLE);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getCopyright() const
 		{
-			return sf_get_string(_sndFile, SF_STR_COPYRIGHT);
+			const char* string = sf_get_string(_sndFile, SF_STR_COPYRIGHT);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getSoftware() const
 		{
-			return sf_get_string(_sndFile, SF_STR_SOFTWARE);
+			const char* string = sf_get_string(_sndFile, SF_STR_SOFTWARE);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getArtist() const
 		{
-			return sf_get_string(_sndFile, SF_STR_ARTIST);
+			const char* string = sf_get_string(_sndFile, SF_STR_ARTIST);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getComment() const
 		{
-			return sf_get_string(_sndFile, SF_STR_COMMENT);
+			const char* string = sf_get_string(_sndFile, SF_STR_COMMENT);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getDate() const
 		{
-			return sf_get_string(_sndFile, SF_STR_DATE);
+			const char* string = sf_get_string(_sndFile, SF_STR_DATE);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getAlbum() const
 		{
-			return sf_get_string(_sndFile, SF_STR_ALBUM);
+			const char* string = sf_get_string(_sndFile, SF_STR_ALBUM);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getLicense() const
 		{
-			return sf_get_string(_sndFile, SF_STR_LICENSE);
+			const char* string = sf_get_string(_sndFile, SF_STR_LICENSE);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getTrackNumber() const
 		{
-			return sf_get_string(_sndFile, SF_STR_TRACKNUMBER);
+			const char* string = sf_get_string(_sndFile, SF_STR_TRACKNUMBER);
+			return string ? string : "null";
 		}
 
 		const char* AudioInfo::getGenre() const
 		{
-			return sf_get_string(_sndFile, SF_STR_GENRE);
+			const char* string = sf_get_string(_sndFile, SF_STR_GENRE);
+			return string ? string : "null";
 		}
 
 		void AudioInfo::setTitle(const char* title)
