@@ -95,7 +95,7 @@ namespace AuroraFW {
 			friend int audioOutputCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 			AudioOStream();
-			AudioOStream(const char* , AudioSource* = nullptr);
+			AudioOStream(const char* , AudioSource* = nullptr, bool = false);
 			~AudioOStream();
 
 			void play();

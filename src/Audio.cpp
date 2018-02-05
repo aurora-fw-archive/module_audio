@@ -244,7 +244,7 @@ namespace AuroraFW {
 				device.getDefaultSampleRate(), 256, debugCallback, NULL));
 		}
 
-		AudioOStream::AudioOStream(const char *path, AudioSource *audioSource)
+		AudioOStream::AudioOStream(const char *path, AudioSource *audioSource, bool buffered)
 			: audioInfo(nullptr, nullptr), _audioSource(audioSource)
 		{
 			SF_INFO* sndInfo = new SF_INFO();
@@ -262,7 +262,7 @@ namespace AuroraFW {
 
 			// Opens the audio stream
 			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, audioInfo.getChannels(), paInt32,
-				device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioOutputCallback, this));
+				device.getDefaultSampleRate(), buffered ? audioInfo.getFrames() - 100 : paFramesPerBufferUnspecified, audioOutputCallback, this));
 		}
 
 		AudioOStream::~AudioOStream()
