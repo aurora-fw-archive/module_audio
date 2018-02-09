@@ -189,7 +189,7 @@ namespace AuroraFW {
 		AudioStream::AudioStream()
 			: _audioSource(nullptr)
 		{
-			AuroraFW::Debug::Log("Debug mode activated for AudioStream instance");
+			AuroraFW::DebugManager::Log("Debug mode activated for AudioStream instance");
 
 			AudioDevice device;
 

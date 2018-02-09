@@ -140,7 +140,7 @@ namespace AuroraFW {
 			numInputDevices = calcNumInputDevices();
 
 			// Prints verbose
-			AuroraFW::Debug::Log("AudioBackend initialized. Num. of available audio devices: ", numDevices,
+			AuroraFW::DebugManager::Log("AudioBackend initialized. Num. of available audio devices: ", numDevices,
 								"(", numOutputDevices, " output devices, ",
 								numInputDevices, " input devices.)");
 		}
@@ -222,7 +222,7 @@ namespace AuroraFW {
 				AudioListener::stop();
 
 				// Prints verbose
-				AuroraFW::Debug::Log("AudioBackend was terminated.");
+				AuroraFW::DebugManager::Log("AudioBackend was terminated.");
 			} else {
 				CLI::Log(CLI::Warning, "The AudioBackend was already terminated. This method shouldn't be called twice!");
 			}
