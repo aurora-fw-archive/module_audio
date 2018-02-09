@@ -1,0 +1,81 @@
+@startuml
+skinparam roundCorner 20
+
+skinparam class {
+	backgroundColor LightGray
+	borderColor Black
+}
+
+!definelong exception(name, type = "T")
+class name <<(E,firebrick) exception>> #FCC {
+	+ name(const type)
+	..
+	+ {abstract} const type what() const throw()
+	--
+	- const type
+}
+!enddefinelong
+
+title Structure of AudioBackend classes
+
+exception(PAErrorException, PaError)
+exception(AudioNotInitializedException)
+
+class AudioDevice {
+	.. Constructor/Destructor ..
+	+ AudioDevice()
+	+ AudioDevice(const PaDeviceInfo* deviceID)
+	+ ~AudioDevice()
+
+	.. Device Info Functions..
+	+ const char* getName() const
+	+ PaHostApiIndex getHostAPI() const
+	+ int getMaxInputChannels() const
+	+ int getMaxOutputChannels() const
+	+ PaTime getDefaultLowInputLatency() const
+	+ PaTime getDefaultLowOutputLatency() const
+	+ PaTime getDefaultHighInputLatency() const
+	+ PaTime getDefaultHighOutputLatency() const
+	+ double getDefaultSampleRate() const
+
+	.. Wrapper Functions ..
+	+ bool isInputDevice() const
+	+ bool isOutputDevice() const
+	+ bool isDefaultInputDevice() const
+	+ bool isDefaultOutputDevice() const
+}
+
+class AudioListener << (S,#FF7700) Singleton >> {
+	.. Destructor ..
+	+ ~AudioListener()
+
+	.. Singleton Functions ..
+	+ {static} AudioListener& getInstance()
+	..
+	+ Math::Vector3D position
+	+ Math::Vector3D direction = Math::Vector3D(0, 0, -1)
+}
+
+class AudioBackend << (S,#FF7700) Singleton >> {
+	.. Destructor ..
+	+ ~AudioBackend()
+
+	.. Singleton Functions ..
+	+ {static} void start()
+	+ {static} AudioBackend& getInstance()
+	+ {static} void terminate()
+
+	.. Audio Device Functions ..
+	+ const AudioDevice* getAllDevices()
+	+ const AudioDevice* getOutputDevices()
+	+ const AudioDevice* getInputDevices()
+
+	+ void setInputDevice(AudioDevice )
+	+ void setOutputDevice(AudioDevice )
+
+	+ int getNumDevices()
+	+ int getNumOutputDevices()
+	+ int getNumInputDevices()
+}
+
+@enduml

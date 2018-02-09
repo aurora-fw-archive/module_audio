@@ -30,36 +30,34 @@ namespace AuroraFW {
 			return _errorMessage.c_str();
 		}
 
-		// audioCallBack
-		int audioCallback(const void *inputBuffer, void *outputBuffer,
-						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
-						PaStreamCallbackFlags statusFlags, void *userData)
+		// audioOutputCallback
+		int audioOutputCallback(const void* inputBuffer, void* outputBuffer,
+						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
+						PaStreamCallbackFlags statusFlags, void* userData)
 		{
 			// Gets the output buffer (it's of type paInt32)
-			int *output = (int*)outputBuffer;
-			AudioStream *audioStream = (AudioStream*)userData;
+			int* output = (int*)outputBuffer;
+			AudioOStream *audioOStream = (AudioOStream*)userData;
+			AudioInfo *audioInfo = &(audioOStream->audioInfo);
 
 			// In case the audio stream is paused, saves the current position and stops the stream
-			if(audioStream->_audioStatus == AudioStatus::Pause) {
-				audioStream->_streamPosFrame = sf_seek(audioStream->_soundFile, 0, SF_SEEK_CUR);
+			if(audioOStream->_audioStatus == AudioStatus::Pause) {
+				audioOStream->_streamPosFrame = sf_seek(audioOStream->_soundFile, 0, SF_SEEK_CUR);
 				return paComplete;
 			}
 
-			// Reads the frames from music file (fills the buffer basically)
-			int readFrames = sf_readf_int(audioStream->_soundFile, output, framesPerBuffer);
-
-			// Plays in reverse if the user wants to
-			//if(audioStream->)
+			int readFrames = sf_readf_int(audioOStream->_soundFile, output, framesPerBuffer);
+			audioOStream->_streamPosFrame += readFrames;
 
 			// Adjusts the volume of each frame
 			for(unsigned int i = 0; i < readFrames; i++) {
 				// Applies the volume to all channels the sound might have
-				for(uint8_t channels = 0; channels < audioStream->_sndInfo.channels; channels++) {
+				for(uint8_t channels = 0; channels < audioInfo->getChannels(); channels++) {
 					float frame = *output;
 					
 					// In case there's 3D audio, calculates 3D audio
-					if(audioStream->_audioSource != nullptr) {
-						AudioSource* source = audioStream->_audioSource;
+					if(audioOStream->_audioSource != nullptr) {
+						AudioSource* source = audioOStream->_audioSource;
 						const float panning = source->getPanning();
 						if(channels == 0)
 							frame *= (-0.5f * panning + 0.5f);
@@ -67,7 +65,7 @@ namespace AuroraFW {
 							frame *= (0.5f * panning + 0.5f);
 					}
 
-					frame *= audioStream->volume;
+					frame *= audioOStream->volume;
 
 					*output++ = frame;
 				}
@@ -79,17 +77,27 @@ namespace AuroraFW {
 			// Else it means it reached end of file.
 			} else {
 				// If the song should be played once, stop the callback
-				if(audioStream->audioLoopMode == AudioLoopMode::Once) {
-					audioStream->_audioStatus = AudioStatus::CallbackStop;
+				if(audioOStream->audioPlayMode == AudioPlayMode::Once) {
+					audioOStream->_audioStatus = AudioStatus::CallbackStop;
 					return paComplete;
 				// Else if the song should be repeated, do so
-				} else if(audioStream->audioLoopMode == AudioLoopMode::Repeat) {
-					audioStream->_streamPosFrame = 0;
-					audioStream->_loops++;
-					sf_seek(audioStream->_soundFile, 0, SEEK_SET);
+				} else if(audioOStream->audioPlayMode == AudioPlayMode::Loop) {
+					// TODO: This leaves a noticeable mark in the buffer that the sound is looping,
+					// it should be seamingless
+					audioOStream->_streamPosFrame = 0;
+					audioOStream->_loops++;
+					sf_seek(audioOStream->_soundFile, 0, SEEK_SET);
 					return paContinue;
 				}
 			}
+		}
+
+		// audioInputCallback
+		int audioInputCallback(const void* inputBuffer, void* outputBuffer,
+						unsigned long int framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
+						PaStreamCallbackFlags statusFlags, void *userData)
+		{
+			// TODO: Implement
 		}
 
 		// debugCallBack
@@ -139,7 +147,7 @@ namespace AuroraFW {
 
 		AudioSource::AudioSource(const AudioSource& audioSource)
 			: falloutType(audioSource.falloutType), _position(audioSource._position),
-				medDistance(audioSource.medDistance), maxDistance(audioSource.maxDistance)
+				_medDistance(audioSource._medDistance), _maxDistance(audioSource._maxDistance)
 		{
 			calculateValues();
 		}
@@ -147,12 +155,19 @@ namespace AuroraFW {
 		void AudioSource::setPosition(Math::Vector3D position)
 		{
 			_position = position;
-			calculateValues();
+			_calculatePan();
 		}
 
-		const Math::Vector3D AudioSource::getPosition()
+		void AudioSource::setMedDistance(float medDistance)
 		{
-			return _position;
+			_medDistance = medDistance;
+			_calculateStrength();
+		}
+
+		void AudioSource::setMaxDistance(float maxDistance)
+		{
+			_maxDistance = maxDistance;
+			_calculateStrength();
 		}
 
 		const float AudioSource::getPanning()
@@ -160,7 +175,33 @@ namespace AuroraFW {
 			return _pan;
 		}
 
+		const float AudioSource::getStrength()
+		{
+			return _strength;
+		}
+
+		const Math::Vector3D AudioSource::getPosition()
+		{
+			return _position;
+		}
+
+		const float AudioSource::getMedDistance()
+		{
+			return _medDistance;
+		}
+
+		const float AudioSource::getMaxDistance()
+		{
+			return _maxDistance;
+		}
+
 		void AudioSource::calculateValues()
+		{
+			_calculatePan();
+			_calculateStrength();
+		}
+
+		void AudioSource::_calculatePan()
 		{
 			Math::Vector3D listenerPos = AudioListener::getInstance().position;
 			Math::Vector3D listenerDir = AudioListener::getInstance().direction;
@@ -184,26 +225,34 @@ namespace AuroraFW {
 
 			_pan = cross.dot(sourcePos.normalized());
 		}
-	
-		// AudioStream
-		AudioStream::AudioStream()
+
+		void AudioSource::_calculateStrength()
+		{
+			// TODO: Implement
+			float distance = Math::abs(_position.distanceToPoint(AudioListener::getInstance().position));
+		}
+
+		// AudioOStream
+		AudioOStream::AudioOStream()
 			: _audioSource(nullptr)
 		{
 			AuroraFW::DebugManager::Log("Debug mode activated for AudioStream instance");
 
 			AudioDevice device;
 
-			getPAError(Pa_OpenDefaultStream(&_paStream, 0, 2, paUInt8,
+			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, 2, paUInt8,
 				device.getDefaultSampleRate(), 256, debugCallback, NULL));
 		}
 
-		AudioStream::AudioStream(const char *path, AudioSource *audioSource)
-			: _audioSource(audioSource)
+		AudioOStream::AudioOStream(const char *path, AudioSource *audioSource, bool buffered)
+			: audioInfo(nullptr, nullptr), _audioSource(audioSource)
 		{
-			// Gets the SNDFILE* from libsndfile
-			_sndInfo.format = 0;
+			SF_INFO* sndInfo = new SF_INFO();
+			sndInfo->format = 0;
 
-			_soundFile = sf_open(path, SFM_READ, &_sndInfo);
+			audioInfo._sndInfo = sndInfo;
+			_soundFile = sf_open(path, SFM_READ, audioInfo._sndInfo);
+			audioInfo._sndFile = _soundFile;
 
 			// If the soundFile is null, it means there was no audio file
 			if(_soundFile == nullptr)
@@ -212,80 +261,87 @@ namespace AuroraFW {
 			AudioDevice device;
 
 			// Opens the audio stream
-			getPAError(Pa_OpenDefaultStream(&_paStream, 0, _sndInfo.channels, paInt32,
-				device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioCallback, this));
+			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, audioInfo.getChannels(), paInt32,
+				device.getDefaultSampleRate(), buffered ? audioInfo.getFrames() - 100 : paFramesPerBufferUnspecified, audioOutputCallback, this));
 		}
 
-		AudioStream::~AudioStream()
+		AudioOStream::~AudioOStream()
 		{
 			// Closes the soundFile
 			if(_soundFile != nullptr)
-				sf_close(_soundFile);
+				catchSNDFILEProblem(sf_close(_soundFile));
 
 			// Deletes audioSource
 			delete _audioSource;
 		}
 
-		void AudioStream::play()
+		void AudioOStream::play()
 		{
 			if(_audioStatus == AudioStatus::CallbackStop)
 				stop();
 			else if(_audioStatus == AudioStatus::Pause)
-				getPAError(Pa_StopStream(_paStream));
+				catchPAProblem(Pa_StopStream(_paStream));
 			
 			_audioStatus = AudioStatus::Play;
 			sf_seek(_soundFile, _streamPosFrame, SF_SEEK_SET);
-			getPAError(Pa_StartStream(_paStream));
+			catchPAProblem(Pa_StartStream(_paStream));
 		}
 
-		void AudioStream::pause()
+		void AudioOStream::pause()
 		{
 			// No PortAudio method is called. During the callback,
 			// the stream is stopped and the current frame stored.
 			_audioStatus = AudioStatus::Pause;
 		}
 
-		void AudioStream::stop()
+		void AudioOStream::stop()
 		{
 			_streamPosFrame = 0;
+			
 			_audioStatus = AudioStatus::Stop;
-			getPAError(Pa_StopStream(_paStream));
+			catchPAProblem(Pa_StopStream(_paStream));
 		}
 
-		bool AudioStream::isPlaying()
+		bool AudioOStream::isPlaying()
 		{
 			return _audioStatus == AudioStatus::Play;
 		}
 
-		bool AudioStream::isPaused()
+		bool AudioOStream::isPaused()
 		{
 			return _audioStatus == AudioStatus::Pause;
 		}
 
-		bool AudioStream::isStopped()
+		bool AudioOStream::isStopped()
 		{
 			return _audioStatus == AudioStatus::Stop;
 		}
 
-		void AudioStream::setStreamPos(unsigned int pos)
+		void AudioOStream::setStreamPos(unsigned int pos)
 		{
 			// TODO: Implement
 		}
 
-		void AudioStream::setStreamPosFrame(unsigned int pos)
+		void AudioOStream::setStreamPosFrame(unsigned int pos)
 		{
 			_streamPosFrame = pos;
 		}
 
-		AudioSource* AudioStream::getAudioSource()
+		AudioSource* AudioOStream::getAudioSource()
 		{
 			return _audioSource;
 		}
 
-		void AudioStream::setAudioSource(const AudioSource& audioSource)
+		void AudioOStream::setAudioSource(const AudioSource& audioSource)
 		{
 			delete _audioSource;
 			_audioSource = new AudioSource(audioSource);
+		}
+
+		// AudioIStream
+		AudioIStream::AudioIStream(const char* path, unsigned int samplerate, unsigned int frames, uint8_t channels)
+		{
+
 		}
 	}
 }

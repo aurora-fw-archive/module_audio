@@ -29,25 +29,37 @@
 // PortAudio
 #include <portaudio.h>
 
+// LibSNDFile
+#include <sndfile.h>
+
 // STD
 #include <exception>
 
 namespace AuroraFW {
 	namespace AudioManager {
-		class AFW_EXPORT PAErrorException : public std::exception
+		class PAErrorException: public std::exception
 		{
-			private:
-				const std::string _paError;
-			public:
-				PAErrorException(const PaError& );
-				virtual const char* what() const throw();
+		private:
+			const std::string _paError;
+		public:
+			PAErrorException(const PaError& );
+			virtual const char* what() const throw();
 		};
 
-		class AFW_EXPORT AudioNotInitializedException : public std::exception
+		class SNDFILEErrorException: public std::exception
 		{
-			public:
-				AudioNotInitializedException() {};
-				virtual const char* what() const throw();
+		private:
+			const std::string _sndFileError;
+		public:
+			SNDFILEErrorException(const int& );
+			virtual const char* what() const throw();
+		};
+
+		class AudioNotInitializedException: public std::exception
+		{
+		public:
+			AudioNotInitializedException() {};
+			virtual const char* what() const throw();
 		};
 
 		struct AFW_EXPORT AudioDevice {
@@ -127,9 +139,24 @@ namespace AuroraFW {
 			int getNumInputDevices();
 		};
 
-		AFW_EXPORT void getPAError(const PaError &error);
-
 		// Inline definitions
+		inline void catchPAProblem(const PaError& error)
+		{
+			if(error != paNoError)
+				throw PAErrorException(error);
+		}
+
+		inline void catchSNDFILEProblem(const int& error)
+		{
+			if(error != SF_ERR_NO_ERROR)
+				throw SNDFILEErrorException(error);
+		}
+
+		inline int AudioBackend::calcNumDevices()
+		{
+			return Pa_GetDeviceCount();
+		}
+
 		inline int AudioBackend::getNumDevices()
 		{
 			return numDevices;

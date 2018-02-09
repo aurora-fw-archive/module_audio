@@ -30,6 +30,16 @@ namespace AuroraFW {
 			return _paError.c_str();
 		}
 
+		// SNDFILEErrorException
+		SNDFILEErrorException::SNDFILEErrorException(const int& error)
+			: _sndFileError(std::string("SNDFILE error: " + std::string(sf_error_number(error))))
+		{}
+
+		const char* SNDFILEErrorException::what() const throw()
+		{
+			return _sndFileError.c_str();
+		}
+
 		// AudioNotInitializedException
 		const char* AudioNotInitializedException::what() const throw()
 		{
@@ -132,7 +142,7 @@ namespace AuroraFW {
 		AudioBackend::AudioBackend()
 		{
 			// Starts PortAudio
-			getPAError(Pa_Initialize());
+			catchPAProblem(Pa_Initialize());
 
 			// Gets number of devices
 			numDevices = calcNumDevices();
@@ -212,7 +222,7 @@ namespace AuroraFW {
 			// Safe guard in case someone terminates it when it's already deleted
 			if(_instance != nullptr) {
 				// Stops PortAudio
-				getPAError(Pa_Terminate());
+				catchPAProblem(Pa_Terminate());
 
 				// Deletes the instance (in case it will be reused again)
 				delete _instance;
@@ -271,17 +281,6 @@ namespace AuroraFW {
 		void AudioBackend::setOutputDevice(const AudioDevice device)
 		{
 			// TODO: Implement later
-		}
-
-		int AudioBackend::calcNumDevices()
-		{
-			return Pa_GetDeviceCount();
-		}
-
-		void getPAError(const PaError& error)
-		{
-			if(error != paNoError)
-				throw PAErrorException(error);
 		}
 	}
 }
