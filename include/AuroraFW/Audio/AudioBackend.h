@@ -22,7 +22,7 @@
 // AuroraFW
 #include <AuroraFW/Global.h>
 #include <AuroraFW/STDL/STL/IOStream.h>
-#include <AuroraFW/Core/Debug.h>
+#include <AuroraFW/Core/DebugManager.h>
 #include <AuroraFW/CLI/Log.h>
 #include <AuroraFW/Math/Vector3D.h>
 
