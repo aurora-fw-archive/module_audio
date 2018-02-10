@@ -273,6 +273,11 @@ namespace AuroraFW {
 			return audioDevices;
 		}
 
+		int AudioBackend::calcNumDevices()
+		{
+			return Pa_GetDeviceCount();
+		}
+
 		void AudioBackend::setInputDevice(const AudioDevice device)
 		{
 			// TODO: Implement later

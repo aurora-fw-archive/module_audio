@@ -48,7 +48,7 @@ namespace AuroraFW {
 			CallbackStop
 		};
 
-		class AudioFileNotFound: public std::exception
+		class AFW_EXPORT AudioFileNotFound : public std::exception
 		{
 		private:
 			const std::string _errorMessage;
