@@ -39,10 +39,10 @@ namespace AuroraFW {
 			AudioInfo(SF_INFO* = nullptr, SNDFILE* = nullptr);
 			~AudioInfo();
 
-			const unsigned int getSampleRate() const;
-			const unsigned long getFrames() const;
-			const int getChannels() const;
-			const int getFormat() const;
+			unsigned int getSampleRate() const;
+			unsigned long getFrames() const;
+			int getChannels() const;
+			int getFormat() const;
 
 			void setSampleRate(const unsigned int );
 			void setFrames(const unsigned long );

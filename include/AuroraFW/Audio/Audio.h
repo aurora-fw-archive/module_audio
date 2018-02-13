@@ -69,12 +69,12 @@ namespace AuroraFW {
 			void setMedDistance(float );
 			void setMaxDistance(float );
 
-			const float getPanning();
-			const float getStrength();
+			float getPanning();
+			float getStrength();
 
-			const Math::Vector3D getPosition();
-			const float getMedDistance();
-			const float getMaxDistance();
+			Math::Vector3D getPosition();
+			float getMedDistance();
+			float getMaxDistance();
 
 			void calculateValues();
 
@@ -92,7 +92,7 @@ namespace AuroraFW {
 
 		struct AFW_API AudioOStream {
 			friend struct AudioSource;
-			friend int audioOutputCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+			friend int audioOutputCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 			AudioOStream();
 			AudioOStream(const char* , AudioSource* = nullptr, bool = false);
@@ -112,7 +112,7 @@ namespace AuroraFW {
 			AudioSource* getAudioSource();
 			void setAudioSource(const AudioSource& );
 
-			const float getNumLoops();
+			float getNumLoops();
 
 			AudioPlayMode audioPlayMode;
 			AudioInfo audioInfo;
@@ -132,7 +132,7 @@ namespace AuroraFW {
 		};
 
 		struct AFW_API AudioIStream {
-			friend int audioInputCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags, void* );
+			friend int audioInputCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags, void* );
 
 			AudioIStream(const char* , unsigned int, unsigned int, uint8_t);
 			~AudioIStream();
@@ -158,12 +158,12 @@ namespace AuroraFW {
 			SF_INFO _sndInfo;
 		};
 
-		int audioCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+		int audioCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
-		int debugCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+		int debugCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 		// Inline definitions
-		inline const float AudioOStream::getNumLoops()
+		inline float AudioOStream::getNumLoops()
 		{
 			return _loops;
 		}

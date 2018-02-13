@@ -32,7 +32,7 @@ namespace AuroraFW {
 
 		// audioOutputCallback
 		int audioOutputCallback(const void* inputBuffer, void* outputBuffer,
-						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
+						size_t framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
 						PaStreamCallbackFlags statusFlags, void* userData)
 		{
 			// Gets the output buffer (it's of type paInt32)
@@ -46,11 +46,11 @@ namespace AuroraFW {
 				return paComplete;
 			}
 
-			int readFrames = sf_readf_int(audioOStream->_soundFile, output, framesPerBuffer);
+			size_t readFrames = sf_readf_int(audioOStream->_soundFile, output, framesPerBuffer);
 			audioOStream->_streamPosFrame += readFrames;
 
 			// Adjusts the volume of each frame
-			for(unsigned int i = 0; i < readFrames; i++) {
+			for(size_t i = 0; i < readFrames; i++) {
 				// Applies the volume to all channels the sound might have
 				for(uint8_t channels = 0; channels < audioInfo->getChannels(); channels++) {
 					float frame = *output;
@@ -76,33 +76,32 @@ namespace AuroraFW {
 				return paContinue;
 			// Else it means it reached end of file.
 			} else {
-				// If the song should be played once, stop the callback
-				if(audioOStream->audioPlayMode == AudioPlayMode::Once) {
-					audioOStream->_audioStatus = AudioStatus::CallbackStop;
-					return paComplete;
-				// Else if the song should be repeated, do so
-				} else if(audioOStream->audioPlayMode == AudioPlayMode::Loop) {
+				// If the song should be repeated, do so
+				if(audioOStream->audioPlayMode == AudioPlayMode::Loop) {
 					// TODO: This leaves a noticeable mark in the buffer that the sound is looping,
 					// it should be seamingless
 					audioOStream->_streamPosFrame = 0;
 					audioOStream->_loops++;
 					sf_seek(audioOStream->_soundFile, 0, SEEK_SET);
 					return paContinue;
+				} else { /* Else the song should be played once, stop the callback */
+					audioOStream->_audioStatus = AudioStatus::CallbackStop;
+					return paComplete;
 				}
 			}
 		}
 
 		// audioInputCallback
 		int audioInputCallback(const void* inputBuffer, void* outputBuffer,
-						unsigned long int framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
+						size_t framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
 						PaStreamCallbackFlags statusFlags, void *userData)
 		{
-			// TODO: Implement
+			#pragma message ("TODO: Need to be implemented")
 		}
 
 		// debugCallBack
 		int debugCallback(const void *inputBuffer, void *outputBuffer,
-						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
+						size_t framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
 						PaStreamCallbackFlags statusFlags, void *userData)
 		{
 			uint8_t left_ear = 0;
@@ -170,27 +169,27 @@ namespace AuroraFW {
 			_calculateStrength();
 		}
 
-		const float AudioSource::getPanning()
+		float AudioSource::getPanning()
 		{
 			return _pan;
 		}
 
-		const float AudioSource::getStrength()
+		float AudioSource::getStrength()
 		{
 			return _strength;
 		}
 
-		const Math::Vector3D AudioSource::getPosition()
+		Math::Vector3D AudioSource::getPosition()
 		{
 			return _position;
 		}
 
-		const float AudioSource::getMedDistance()
+		float AudioSource::getMedDistance()
 		{
 			return _medDistance;
 		}
 
-		const float AudioSource::getMaxDistance()
+		float AudioSource::getMaxDistance()
 		{
 			return _maxDistance;
 		}
@@ -228,7 +227,7 @@ namespace AuroraFW {
 
 		void AudioSource::_calculateStrength()
 		{
-			// TODO: Implement
+			#pragma message ("TODO: Need to be implemented")
 			float distance = Math::abs(_position.distanceToPoint(AudioListener::getInstance().position));
 		}
 

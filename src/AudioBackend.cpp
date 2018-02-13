@@ -280,12 +280,12 @@ namespace AuroraFW {
 
 		void AudioBackend::setInputDevice(const AudioDevice device)
 		{
-			// TODO: Implement later
+			#pragma message ("TODO: Need to be implemented")
 		}
 
 		void AudioBackend::setOutputDevice(const AudioDevice device)
 		{
-			// TODO: Implement later
+			#pragma message ("TODO: Need to be implemented")
 		}
 	}
 }

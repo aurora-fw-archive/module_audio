@@ -31,22 +31,22 @@ namespace AuroraFW {
 			delete _sndInfo;
 		}
 
-		const unsigned int AudioInfo::getSampleRate() const
+		unsigned int AudioInfo::getSampleRate() const
 		{
 			return _sndInfo->samplerate;
 		}
 
-		const unsigned long AudioInfo::getFrames() const
+		size_t AudioInfo::getFrames() const
 		{
 			return _sndInfo->frames;
 		}
 
-		const int AudioInfo::getChannels() const
+		int AudioInfo::getChannels() const
 		{
 			return _sndInfo->channels;
 		}
 
-		const int AudioInfo::getFormat() const
+		int AudioInfo::getFormat() const
 		{
 			return _sndInfo->format;
 		}
