@@ -48,7 +48,7 @@ namespace AuroraFW {
 			CallbackStop
 		};
 
-		class AFW_EXPORT AudioFileNotFound : public std::exception
+		class AFW_API AudioFileNotFound : public std::exception
 		{
 		private:
 			const std::string _errorMessage;
@@ -57,7 +57,7 @@ namespace AuroraFW {
 			virtual const char* what() const throw();
 		};
 
-		struct AFW_EXPORT AudioSource {
+		struct AFW_API AudioSource {
 			AudioSource();
 			AudioSource(const Math::Vector3D);
 			AudioSource(const float , const float , const float );
@@ -90,7 +90,7 @@ namespace AuroraFW {
 			float _pan = 0;
 		};
 
-		struct AFW_EXPORT AudioOStream {
+		struct AFW_API AudioOStream {
 			friend struct AudioSource;
 			friend int audioOutputCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
@@ -131,7 +131,7 @@ namespace AuroraFW {
 			AudioSource *_audioSource;
 		};
 
-		struct AFW_EXPORT AudioIStream {
+		struct AFW_API AudioIStream {
 			friend int audioInputCallback(const void* , void* , unsigned long , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags, void* );
 
 			AudioIStream(const char* , unsigned int, unsigned int, uint8_t);

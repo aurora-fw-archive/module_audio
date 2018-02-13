@@ -21,13 +21,18 @@
 
 // AuroraFW
 #include <AuroraFW/Global.h>
+#if(AFW_TARGET_PRAGMA_ONCE_SUPPORT)
+	#pragma once
+#endif
+
+#include <AuroraFW/Internal/Config.h>
 
 // LibSNDFile
 #include <sndfile.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
-		struct AFW_EXPORT AudioInfo {
+		struct AFW_API AudioInfo {
 			friend struct AudioOStream;
 			friend struct AudioIStream;
 

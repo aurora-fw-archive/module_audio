@@ -37,7 +37,7 @@
 
 namespace AuroraFW {
 	namespace AudioManager {
-		class AFW_EXPORT PAErrorException : public std::exception
+		class AFW_API PAErrorException : public std::exception
 		{
 		private:
 			const std::string _paError;
@@ -46,7 +46,7 @@ namespace AuroraFW {
 			virtual const char* what() const throw();
 		};
 
-		class AFW_EXPORT SNDFILEErrorException : public std::exception
+		class AFW_API SNDFILEErrorException : public std::exception
 		{
 		private:
 			const std::string _sndFileError;
@@ -55,14 +55,14 @@ namespace AuroraFW {
 			virtual const char* what() const throw();
 		};
 
-		class AFW_EXPORT AudioNotInitializedException : public std::exception
+		class AFW_API AudioNotInitializedException : public std::exception
 		{
 		public:
 			AudioNotInitializedException() {};
 			virtual const char* what() const throw();
 		};
 
-		struct AFW_EXPORT AudioDevice {
+		struct AFW_API AudioDevice {
 			AudioDevice();
 			AudioDevice(const PaDeviceInfo* );
 
@@ -87,7 +87,7 @@ namespace AuroraFW {
 			const PaDeviceInfo *_deviceInfo;
 		};
 
-		class AFW_EXPORT AudioListener {
+		class AFW_API AudioListener {
 			private:
 				static AudioListener *_instance;
 				AudioListener() {};
@@ -105,7 +105,7 @@ namespace AuroraFW {
 				Math::Vector3D direction = Math::Vector3D(0, 0, -1);
 		};
 
-		class AFW_EXPORT AudioBackend {
+		class AFW_API AudioBackend {
 		private:
 			static AudioBackend *_instance;
 			AudioBackend();
