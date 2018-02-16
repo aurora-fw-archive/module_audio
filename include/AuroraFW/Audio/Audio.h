@@ -40,14 +40,6 @@ namespace AuroraFW {
 			Loop,
 		};
 
-		enum class AudioStatus {
-			Play,
-			Pause,
-			Stop,
-			// FIXME: This value should be internal to AuroraFW, find a solution so users don't mess with it
-			CallbackStop
-		};
-
 		class AFW_API AudioFileNotFound : public std::exception
 		{
 		private:
@@ -106,6 +98,8 @@ namespace AuroraFW {
 			bool isPaused();
 			bool isStopped();
 
+			PaStream* debugGetStream();
+
 			void setStreamPos(unsigned int );
 			void setStreamPosFrame(unsigned int );
 
@@ -124,7 +118,7 @@ namespace AuroraFW {
 			SNDFILE *_soundFile = nullptr;
 			PaStream *_paStream;
 
-			AudioStatus _audioStatus = AudioStatus::Stop;
+			float* _buffer = nullptr;
 			unsigned int _streamPosFrame = 0;
 			uint8_t _loops = 0;
 			

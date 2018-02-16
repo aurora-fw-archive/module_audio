@@ -37,27 +37,39 @@ namespace AuroraFW {
 		{
 			// Gets the output buffer (it's of type paInt32)
 			int* output = (int*)outputBuffer;
-			AudioOStream *audioOStream = (AudioOStream*)userData;
-			AudioInfo *audioInfo = &(audioOStream->audioInfo);
+			AudioOStream *audioStream = (AudioOStream*)userData;
+			AudioInfo *audioInfo = &(audioStream->audioInfo);
 
 			// In case the audio stream is paused, saves the current position and stops the stream
-			if(audioOStream->_audioStatus == AudioStatus::Pause) {
-				audioOStream->_streamPosFrame = sf_seek(audioOStream->_soundFile, 0, SF_SEEK_CUR);
+			if(audioStream->isPaused()) {
+				audioStream->_streamPosFrame = sf_seek(audioStream->_soundFile, 0, SF_SEEK_CUR);
 				return paComplete;
 			}
 
-			size_t readFrames = sf_readf_int(audioOStream->_soundFile, output, framesPerBuffer);
-			audioOStream->_streamPosFrame += readFrames;
+			// Reads the audio
+			size_t readFrames;
+			if(audioStream->_buffer != nullptr) {	// Buffered
+				readFrames = (framesPerBuffer + audioStream->_streamPosFrame) > audioInfo->getFrames()
+							? audioInfo->getFrames() - audioStream->_streamPosFrame
+							: framesPerBuffer;
+				
+
+			} else {	// Streaming
+				readFrames = sf_readf_int(audioStream->_soundFile, output, framesPerBuffer);
+			}
+
+			audioStream->_streamPosFrame += readFrames;
+			
 
 			// Adjusts the volume of each frame
 			for(size_t i = 0; i < readFrames; i++) {
 				// Applies the volume to all channels the sound might have
 				for(uint8_t channels = 0; channels < audioInfo->getChannels(); channels++) {
 					float frame = *output;
-					
+
 					// In case there's 3D audio, calculates 3D audio
-					if(audioOStream->_audioSource != nullptr) {
-						AudioSource* source = audioOStream->_audioSource;
+					if(audioStream->_audioSource != nullptr) {
+						AudioSource* source = audioStream->_audioSource;
 						const float panning = source->getPanning();
 						if(channels == 0)
 							frame *= (-0.5f * panning + 0.5f);
@@ -65,30 +77,29 @@ namespace AuroraFW {
 							frame *= (0.5f * panning + 0.5f);
 					}
 
-					frame *= audioOStream->volume;
+					frame *= audioStream->volume;
 
 					*output++ = frame;
 				}
 			}
 
-			// If the read frames filled the buffer to read, continues playing
-			if(readFrames == framesPerBuffer) {
-				return paContinue;
-			// Else it means it reached end of file.
-			} else {
+			// If the read frames didn't fill the buffer to read, it reached EOF
+			if(readFrames < framesPerBuffer) {
 				// If the song should be repeated, do so
-				if(audioOStream->audioPlayMode == AudioPlayMode::Loop) {
-					// TODO: This leaves a noticeable mark in the buffer that the sound is looping,
-					// it should be seamingless
-					audioOStream->_streamPosFrame = 0;
-					audioOStream->_loops++;
-					sf_seek(audioOStream->_soundFile, 0, SEEK_SET);
+				if(audioStream->audioPlayMode == AudioPlayMode::Loop) {
+					#pragma message ("TODO: This leaves a noticeable mark in the buffer that the sound is looping, it shoudl be seamingless.")
+
+					audioStream->_streamPosFrame = 0;
+					audioStream->_loops++;
+					sf_seek(audioStream->_soundFile, 0, SEEK_SET);
+
 					return paContinue;
-				} else { /* Else the song should be played once, stop the callback */
-					audioOStream->_audioStatus = AudioStatus::CallbackStop;
+				} else {
 					return paComplete;
 				}
 			}
+
+			return paContinue;
 		}
 
 		// audioInputCallback
@@ -104,6 +115,7 @@ namespace AuroraFW {
 						size_t framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
 						PaStreamCallbackFlags statusFlags, void *userData)
 		{
+
 			uint8_t left_ear = 0;
 			uint8_t right_ear = 0;
 
@@ -249,9 +261,19 @@ namespace AuroraFW {
 			SF_INFO* sndInfo = new SF_INFO();
 			sndInfo->format = 0;
 
+			#pragma message ("FIXME: Two instances of SNDFILE due to inclusion of AudioInfo, optimize that")
+
 			audioInfo._sndInfo = sndInfo;
 			_soundFile = sf_open(path, SFM_READ, audioInfo._sndInfo);
 			audioInfo._sndFile = _soundFile;
+
+			// If the audio should be buffered, do so
+			if(buffered) {
+				AuroraFW::DebugManager::Log("Buffering the audio...");
+				_buffer = new float[audioInfo.getFrames() * audioInfo.getChannels()];
+				sf_readf_float(_soundFile, _buffer, audioInfo.getFrames());
+				AuroraFW::DebugManager::Log("Buffering complete.");
+			}
 
 			// If the soundFile is null, it means there was no audio file
 			if(_soundFile == nullptr)
@@ -261,7 +283,7 @@ namespace AuroraFW {
 
 			// Opens the audio stream
 			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, audioInfo.getChannels(), paInt32,
-				device.getDefaultSampleRate(), buffered ? audioInfo.getFrames() - 100 : paFramesPerBufferUnspecified, audioOutputCallback, this));
+				device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioOutputCallback, this));
 		}
 
 		AudioOStream::~AudioOStream()
@@ -274,46 +296,42 @@ namespace AuroraFW {
 			delete _audioSource;
 		}
 
+		PaStream* AudioOStream::debugGetStream()
+		{
+			return _paStream;
+		}
+
 		void AudioOStream::play()
 		{
-			if(_audioStatus == AudioStatus::CallbackStop)
-				stop();
-			else if(_audioStatus == AudioStatus::Pause)
-				catchPAProblem(Pa_StopStream(_paStream));
-			
-			_audioStatus = AudioStatus::Play;
 			sf_seek(_soundFile, _streamPosFrame, SF_SEEK_SET);
 			catchPAProblem(Pa_StartStream(_paStream));
 		}
 
 		void AudioOStream::pause()
 		{
-			// No PortAudio method is called. During the callback,
-			// the stream is stopped and the current frame stored.
-			_audioStatus = AudioStatus::Pause;
+			catchPAProblem(Pa_StopStream(_paStream));
 		}
 
 		void AudioOStream::stop()
 		{
 			_streamPosFrame = 0;
 			
-			_audioStatus = AudioStatus::Stop;
 			catchPAProblem(Pa_StopStream(_paStream));
 		}
 
 		bool AudioOStream::isPlaying()
 		{
-			return _audioStatus == AudioStatus::Play;
+			return Pa_IsStreamActive(_paStream);
 		}
 
 		bool AudioOStream::isPaused()
 		{
-			return _audioStatus == AudioStatus::Pause;
+			return isStopped() && _streamPosFrame != 0;
 		}
 
 		bool AudioOStream::isStopped()
 		{
-			return _audioStatus == AudioStatus::Stop;
+			return Pa_IsStreamStopped(_paStream);
 		}
 
 		void AudioOStream::setStreamPos(unsigned int pos)
