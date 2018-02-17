@@ -42,7 +42,7 @@ namespace AuroraFW {
 
 			// In case the audio stream is paused, saves the current position and stops the stream
 			if(audioStream->isPaused()) {
-				audioStream->_streamPosFrame = sf_seek(audioStream->_soundFile, 0, SF_SEEK_CUR);
+				audioStream->_streamPosFrame = sf_seek(audioInfo->_sndFile, 0, SF_SEEK_CUR);
 				return paComplete;
 			}
 
@@ -52,14 +52,19 @@ namespace AuroraFW {
 				readFrames = (framesPerBuffer + audioStream->_streamPosFrame) > audioInfo->getFrames()
 							? audioInfo->getFrames() - audioStream->_streamPosFrame
 							: framesPerBuffer;
+
+				for(size_t i = 0; i < readFrames; i++) {
+					for(uint8_t channels = 0; channels < audioInfo->getChannels(); channels++) {
+						output[i * audioInfo->getChannels() + channels] = audioStream->_buffer[audioStream->_streamPosFrame * audioInfo->getChannels() + (i * audioInfo->getChannels() + channels)];
+					}
+				}
 				
 
 			} else {	// Streaming
-				readFrames = sf_readf_int(audioStream->_soundFile, output, framesPerBuffer);
+				readFrames = sf_readf_int(audioInfo->_sndFile, output, framesPerBuffer);
 			}
 
 			audioStream->_streamPosFrame += readFrames;
-			
 
 			// Adjusts the volume of each frame
 			for(size_t i = 0; i < readFrames; i++) {
@@ -91,7 +96,7 @@ namespace AuroraFW {
 
 					audioStream->_streamPosFrame = 0;
 					audioStream->_loops++;
-					sf_seek(audioStream->_soundFile, 0, SEEK_SET);
+					sf_seek(audioInfo->_sndFile, 0, SEEK_SET);
 
 					return paContinue;
 				} else {
@@ -264,19 +269,18 @@ namespace AuroraFW {
 			#pragma message ("FIXME: Two instances of SNDFILE due to inclusion of AudioInfo, optimize that")
 
 			audioInfo._sndInfo = sndInfo;
-			_soundFile = sf_open(path, SFM_READ, audioInfo._sndInfo);
-			audioInfo._sndFile = _soundFile;
+			audioInfo._sndFile = sf_open(path, SFM_READ, audioInfo._sndInfo);
 
 			// If the audio should be buffered, do so
 			if(buffered) {
-				AuroraFW::DebugManager::Log("Buffering the audio...");
-				_buffer = new float[audioInfo.getFrames() * audioInfo.getChannels()];
-				sf_readf_float(_soundFile, _buffer, audioInfo.getFrames());
+				AuroraFW::DebugManager::Log("Buffering the audio... (Total frames: ", audioInfo.getFrames() * audioInfo.getChannels(), ")");
+				_buffer = AFW_NEW int[audioInfo.getFrames() * audioInfo.getChannels()];
+				sf_readf_int(audioInfo._sndFile, _buffer, audioInfo.getFrames());
 				AuroraFW::DebugManager::Log("Buffering complete.");
 			}
 
 			// If the soundFile is null, it means there was no audio file
-			if(_soundFile == nullptr)
+			if(audioInfo._sndFile == nullptr)
 				throw AudioFileNotFound(path);
 
 			AudioDevice device;
@@ -289,21 +293,21 @@ namespace AuroraFW {
 		AudioOStream::~AudioOStream()
 		{
 			// Closes the soundFile
-			if(_soundFile != nullptr)
-				catchSNDFILEProblem(sf_close(_soundFile));
+			if(audioInfo._sndFile != AFW_NULLPTR)
+				catchSNDFILEProblem(sf_close(audioInfo._sndFile));
+
+			// Deletes the buffer
+			if(_buffer != AFW_NULLPTR)
+				delete[] _buffer;
 
 			// Deletes audioSource
-			delete _audioSource;
-		}
-
-		PaStream* AudioOStream::debugGetStream()
-		{
-			return _paStream;
+			if(_audioSource != AFW_NULLPTR)
+				delete _audioSource;
 		}
 
 		void AudioOStream::play()
 		{
-			sf_seek(_soundFile, _streamPosFrame, SF_SEEK_SET);
+			sf_seek(audioInfo._sndFile, _streamPosFrame, SF_SEEK_SET);
 			catchPAProblem(Pa_StartStream(_paStream));
 		}
 

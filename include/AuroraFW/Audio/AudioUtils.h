@@ -30,11 +30,15 @@
 // LibSNDFile
 #include <sndfile.h>
 
+// PortAudio
+#include <portaudio.h>
+
 namespace AuroraFW {
 	namespace AudioManager {
 		struct AFW_API AudioInfo {
 			friend struct AudioOStream;
 			friend struct AudioIStream;
+			friend int audioOutputCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 			AudioInfo(SF_INFO* = nullptr, SNDFILE* = nullptr);
 			~AudioInfo();

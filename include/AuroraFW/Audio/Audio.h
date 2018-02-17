@@ -24,9 +24,7 @@
 #include <AuroraFW/Audio/AudioBackend.h>
 #include <AuroraFW/Audio/AudioUtils.h>
 #include <AuroraFW/Math/Algorithm.h>
-
-// LibSNDFile
-#include <sndfile.h>
+#include <AuroraFW/CoreLib/Allocator.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
@@ -98,8 +96,6 @@ namespace AuroraFW {
 			bool isPaused();
 			bool isStopped();
 
-			PaStream* debugGetStream();
-
 			void setStreamPos(unsigned int );
 			void setStreamPosFrame(unsigned int );
 
@@ -115,10 +111,9 @@ namespace AuroraFW {
 			float pitch = 1;
 
 		private:
-			SNDFILE *_soundFile = nullptr;
 			PaStream *_paStream;
 
-			float* _buffer = nullptr;
+			int* _buffer = nullptr;
 			unsigned int _streamPosFrame = 0;
 			uint8_t _loops = 0;
 			
