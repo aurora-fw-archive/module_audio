@@ -261,13 +261,9 @@ namespace AuroraFW {
 		}
 
 		AudioOStream::AudioOStream(const char *path, AudioSource *audioSource, bool buffered)
-			: audioInfo(nullptr, nullptr), _audioSource(audioSource)
+			: audioInfo(), _audioSource(audioSource)
 		{
 			SF_INFO* sndInfo = new SF_INFO();
-			sndInfo->format = 0;
-
-			#pragma message ("FIXME: Two instances of SNDFILE due to inclusion of AudioInfo, optimize that")
-
 			audioInfo._sndInfo = sndInfo;
 			audioInfo._sndFile = sf_open(path, SFM_READ, audioInfo._sndInfo);
 
@@ -292,10 +288,6 @@ namespace AuroraFW {
 
 		AudioOStream::~AudioOStream()
 		{
-			// Closes the soundFile
-			if(audioInfo._sndFile != AFW_NULLPTR)
-				catchSNDFILEProblem(sf_close(audioInfo._sndFile));
-
 			// Deletes the buffer
 			if(_buffer != AFW_NULLPTR)
 				delete[] _buffer;

@@ -17,6 +17,7 @@
 ****************************************************************************/
 
 #include <AuroraFW/Audio/AudioUtils.h>
+#include <AuroraFW/Audio/AudioBackend.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
@@ -27,8 +28,12 @@ namespace AuroraFW {
 
 		AudioInfo::~AudioInfo()
 		{
-			// NOTE: _sndFile is not deleted because that task belongs to AudioO/IStream
+			// NOTE: _sndInfo is deleted internally by libSNDFile
+			if(_sndFile != AFW_NULLPTR)
+				catchSNDFILEProblem(sf_close(_sndFile));
+
 			delete _sndInfo;
+			
 		}
 
 		unsigned int AudioInfo::getSampleRate() const

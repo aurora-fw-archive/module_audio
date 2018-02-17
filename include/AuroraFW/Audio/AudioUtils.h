@@ -27,6 +27,8 @@
 
 #include <AuroraFW/Internal/Config.h>
 
+#include <AuroraFW/CoreLib/Allocator.h>
+
 // LibSNDFile
 #include <sndfile.h>
 
