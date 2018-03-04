@@ -20,8 +20,13 @@ if (NOT CONFIGURED_ONCE)
 	set(AURORAFW_MODULE_AUDIO_SOURCE_DIR ${AURORAFW_MODULE_AUDIO_DIR}/src)
 endif()
 
-find_package(PortAudio REQUIRED)
-find_package(sndfile REQUIRED)
+IF(DEFINED AURORAFW_IS_BUILDING)
+	AURORA_ADD_CMAKE_MODULE("PortAudio" CMAKE ${AURORAFW_ROOT_DIR}/cmake/portaudio)
+	AURORA_ADD_CMAKE_MODULE("sndfile" CMAKE ${AURORAFW_ROOT_DIR}/cmake/sndfile)
+ELSE()
+	find_package(PortAudio REQUIRED)
+	find_package(sndfile REQUIRED)
+ENDIF()
 
 include_directories(${AURORAFW_MODULE_AUDIO_DIR}/include ${OPENAL_INCLUDE_DIR})
 
