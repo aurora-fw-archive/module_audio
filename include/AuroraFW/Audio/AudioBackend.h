@@ -137,6 +137,8 @@ namespace AuroraFW {
 			int getNumDevices();
 			int getNumOutputDevices();
 			int getNumInputDevices();
+
+			float globalVolume = 1;
 		};
 
 		// Inline definitions

@@ -104,6 +104,8 @@ namespace AuroraFW {
 
 			float getNumLoops();
 
+			float getCpuLoad();
+
 			AudioPlayMode audioPlayMode;
 			AudioInfo audioInfo;
 
@@ -113,7 +115,7 @@ namespace AuroraFW {
 		private:
 			PaStream *_paStream;
 
-			int* _buffer = nullptr;
+			float* _buffer = nullptr;
 			unsigned int _streamPosFrame = 0;
 			uint8_t _loops = 0;
 			
