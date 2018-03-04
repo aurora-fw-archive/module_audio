@@ -20,6 +20,9 @@ if (NOT CONFIGURED_ONCE)
 	set(AURORAFW_MODULE_AUDIO_SOURCE_DIR ${AURORAFW_MODULE_AUDIO_DIR}/src)
 endif()
 
+find_package(PortAudio REQUIRED)
+find_package(sndfile REQUIRED)
+
 include_directories(${AURORAFW_MODULE_AUDIO_DIR}/include ${OPENAL_INCLUDE_DIR})
 
 file(GLOB_RECURSE AURORAFW_MODULE_AUDIO_HEADERS ${AURORAFW_MODULE_AUDIO_DIR}/include/*.*)
@@ -30,6 +33,6 @@ if(AURORA_PCH)
 	add_precompiled_header(aurorafw-audio "${AURORAFW_MODULE_AUDIO_HEADERS}")
 endif()
 
-target_link_libraries(aurorafw-audio aurorafw-core aurorafw-cli portaudio sndfile)
+target_link_libraries(aurorafw-audio aurorafw-core aurorafw-cli ${PortAudio_LIBRARIES} ${sndfile_LIBRARIES})
 
 set_target_properties(aurorafw-audio PROPERTIES OUTPUT_NAME aurorafw-audio)

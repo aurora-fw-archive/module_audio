@@ -82,4 +82,4 @@ namespace AuroraFW {
 	}
 }
 
-#endif  // AURORAFW_AUDIO_AUDIO_UTILS_H
+#endif // AURORAFW_AUDIO_AUDIO_UTILS_H
