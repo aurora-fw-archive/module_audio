@@ -87,7 +87,7 @@ namespace AuroraFW {
 							frame *= (0.5f * panning + 0.5f);
 					}
 
-					frame *= audioStream->volume;
+					frame *= audioStream->volume * AudioBackend::getInstance().globalVolume;
 
 					*output++ = frame;
 				}
