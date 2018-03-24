@@ -36,12 +36,12 @@ namespace AuroraFW {
 			
 		}
 
-		unsigned int AudioInfo::getSampleRate() const
+		int AudioInfo::getSampleRate() const
 		{
 			return _sndInfo->samplerate;
 		}
 
-		size_t AudioInfo::getFrames() const
+		sf_count_t AudioInfo::getFrames() const
 		{
 			return _sndInfo->frames;
 		}
@@ -56,12 +56,12 @@ namespace AuroraFW {
 			return _sndInfo->format;
 		}
 
-		void AudioInfo::setSampleRate(const unsigned int samplerate)
+		void AudioInfo::setSampleRate(const int samplerate)
 		{
 			_sndInfo->samplerate = samplerate;
 		}
 
-		void AudioInfo::setFrames(const unsigned long frames)
+		void AudioInfo::setFrames(const sf_count_t frames)
 		{
 			_sndInfo->frames = frames;
 		}

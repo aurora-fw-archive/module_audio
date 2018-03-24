@@ -16,8 +16,8 @@
 ** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
 ****************************************************************************/
 
-#ifndef AURORAFW_AUDIO_AUDIO_H
-#define AURORAFW_AUDIO_AUDIO_H
+#ifndef AURORAFW_AUDIO_AUDIO_OUTPUT_H
+#define AURORAFW_AUDIO_AUDIO_OUTPUT_H
 
 // AuroraFW
 #include <AuroraFW/Global.h>
@@ -121,36 +121,7 @@ namespace AuroraFW {
 			
 			AudioSource *_audioSource;
 		};
-
-		struct AFW_API AudioIStream {
-			friend int audioInputCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags, void* );
-
-			AudioIStream(const char* , unsigned int, unsigned int, uint8_t);
-			~AudioIStream();
-
-			void record();
-			void pause();
-			void stop();
-
-			bool isRecording();
-			bool isPaused();
-			bool isStopped();
-			bool isBufferFull();
-
-			void clearBuffer();
-			void clearBuffer(unsigned int start, unsigned int finish);
-
-			bool save();
-
-			const char* path;
-			float* buffer;
-		private:
-			SNDFILE *_soundFile = nullptr;
-			SF_INFO _sndInfo;
-		};
-
-		int audioCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
-
+		
 		int debugCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 		// Inline definitions
@@ -161,4 +132,4 @@ namespace AuroraFW {
 	}
 }
 
-#endif // AURORAFW_AUDIO_AUDIO_H
+#endif // AURORAFW_AUDIO_AUDIO_OUTPUT_H

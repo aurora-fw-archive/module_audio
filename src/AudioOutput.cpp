@@ -16,7 +16,7 @@
 ** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
 ****************************************************************************/
 
-#include <AuroraFW/Audio/Audio.h>
+#include <AuroraFW/Audio/AudioOutput.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
@@ -98,14 +98,6 @@ namespace AuroraFW {
 				return paComplete;
 
 			return paContinue;
-		}
-
-		// audioInputCallback
-		int audioInputCallback(const void* inputBuffer, void* outputBuffer,
-						size_t framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
-						PaStreamCallbackFlags statusFlags, void *userData)
-		{
-			#pragma message ("TODO: Need to be implemented")
 		}
 
 		// debugCallBack
@@ -256,8 +248,6 @@ namespace AuroraFW {
 		AudioOStream::AudioOStream(const char *path, AudioSource *audioSource, bool buffered)
 			: audioInfo(), _audioSource(audioSource)
 		{
-			SF_INFO* sndInfo = new SF_INFO();
-			audioInfo._sndInfo = sndInfo;
 			audioInfo._sndFile = sf_open(path, SFM_READ, audioInfo._sndInfo);
 
 			// If the audio should be buffered, do so
@@ -347,12 +337,6 @@ namespace AuroraFW {
 		float AudioOStream::getCpuLoad()
 		{
 			return Pa_GetStreamCpuLoad(_paStream);
-		}
-
-		// AudioIStream
-		AudioIStream::AudioIStream(const char* path, unsigned int samplerate, unsigned int frames, uint8_t channels)
-		{
-
 		}
 	}
 }

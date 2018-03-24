@@ -42,16 +42,16 @@ namespace AuroraFW {
 			friend struct AudioIStream;
 			friend int audioOutputCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
-			AudioInfo(SF_INFO* = nullptr, SNDFILE* = nullptr);
+			AudioInfo(SF_INFO* = new SF_INFO(), SNDFILE* = nullptr);
 			~AudioInfo();
 
-			unsigned int getSampleRate() const;
-			unsigned long getFrames() const;
+			int getSampleRate() const;
+			sf_count_t getFrames() const;
 			int getChannels() const;
 			int getFormat() const;
 
-			void setSampleRate(const unsigned int );
-			void setFrames(const unsigned long );
+			void setSampleRate(const int );
+			void setFrames(const sf_count_t );
 			void setChannels(const int );
 			void setFormat(const int );
 
