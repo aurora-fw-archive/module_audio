@@ -118,7 +118,6 @@ namespace AuroraFW {
 						size_t framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
 						PaStreamCallbackFlags statusFlags, void* userData)
 		{
-
 			uint8_t left_ear = 0;
 			uint8_t right_ear = 0;
 

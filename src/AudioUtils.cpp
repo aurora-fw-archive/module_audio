@@ -33,7 +33,6 @@ namespace AuroraFW {
 				catchSNDFILEProblem(sf_close(_sndFile));
 
 			delete _sndInfo;
-			
 		}
 
 		int AudioInfo::getSampleRate() const

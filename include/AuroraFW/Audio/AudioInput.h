@@ -51,6 +51,7 @@ namespace AuroraFW {
 			AudioInfo* info;
 			float* buffer;	// TODO - Check if this needs to be private
 			const int bufferSize;
+
 		private:
 			PaStream* _paStream;
 			unsigned int _streamPosFrame = 0;
