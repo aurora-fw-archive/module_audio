@@ -21,9 +21,10 @@
 namespace AuroraFW {
 	namespace AudioManager {
 		// AudioFileNotFound
-		AudioFileNotFound::AudioFileNotFound(const char *fileName)
-			: _errorMessage(std::string("The specified audio file \"" + std::string(fileName)
-				+ "\" couldn't be found/read!")) {}
+		AudioFileNotFound::AudioFileNotFound(const char* fileName)
+			: _errorMessage(std::string("The specified audio file \""
+			+ std::string(fileName)
+			+ "\" couldn't be found/read!")) {}
 
 		const char* AudioFileNotFound::what() const throw()
 		{
@@ -35,46 +36,56 @@ namespace AuroraFW {
 						size_t framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
 						PaStreamCallbackFlags statusFlags, void* userData)
 		{
-			// Gets the output buffer (it's of type paFloat32), and the audioStream and audioInfo
+			#pragma message("TODO: Cleanup this method as much as possible")
+			// Gets the output buffer (it's of type paFloat32), and
+			// the audioStream and audioInfo
 			float* output = (float*)outputBuffer;
-			AudioOStream *audioStream = (AudioOStream*)userData;
-			AudioInfo *audioInfo = &(audioStream->audioInfo);
+			AudioOStream* audioStream = (AudioOStream*)userData;
+			AudioInfo* audioInfo = &(audioStream->audioInfo);
 
 			// Reads the audio
 			size_t readFrames = 0, offset = 0, framesToRead = framesPerBuffer;
 			do {
 				int readFramesNow;
 				if(audioStream->_buffer != nullptr) {	// Buffered
-					readFramesNow = (framesToRead + audioStream->_streamPosFrame) > audioInfo->getFrames()
-								? audioInfo->getFrames() - audioStream->_streamPosFrame
-								: framesToRead;
+					readFramesNow = (framesToRead + audioStream->_streamPosFrame)
+					> audioInfo->getFrames()
+					? audioInfo->getFrames() - audioStream->_streamPosFrame
+					: framesToRead;
 
 					for(size_t f = 0; f < readFramesNow; f++) {
 						for(uint8_t c = 0; c < audioInfo->getChannels(); c++) {
-							output[(offset * audioInfo->getChannels()) + f * audioInfo->getChannels() + c] = audioStream->_buffer[audioStream->_streamPosFrame * audioInfo->getChannels() + (f * audioInfo->getChannels() + c)];
+							output[(offset * audioInfo->getChannels())
+							+ f * audioInfo->getChannels() + c]
+							= audioStream->_buffer[audioStream->_streamPosFrame
+							* audioInfo->getChannels() + (f * audioInfo->getChannels()
+							+ c)];
 						}
 					}
 				} else {	// Streaming
-					readFramesNow = sf_readf_float(audioInfo->_sndFile, output + (offset * audioInfo->getChannels()), framesToRead);
+					readFramesNow = sf_readf_float(audioInfo->_sndFile, output
+					+ (offset * audioInfo->getChannels()), framesToRead);
 				}
 
 				audioStream->_streamPosFrame += readFramesNow;
 				framesToRead -= readFramesNow;
 				readFrames += readFramesNow;
 
-				if(framesToRead > 0 && audioStream->audioPlayMode == AudioPlayMode::Loop) {
+				if(framesToRead > 0 && audioStream->audioPlayMode
+					== AudioPlayMode::Loop) {
 					audioStream->_streamPosFrame = 0;
 					audioStream->_loops++;
 					offset += readFramesNow;
-					if(audioStream->_buffer == nullptr) {	// Streaming
+					if(audioStream->_buffer == nullptr)	// Streaming
 						sf_seek(audioInfo->_sndFile, 0, SF_SEEK_SET);
-					}
 				}
-			} while(framesToRead > 0 && audioStream->audioPlayMode != AudioPlayMode::Once);
+			} while(framesToRead > 0 && audioStream->audioPlayMode
+					!= AudioPlayMode::Once);
 			// Adjusts the volume of each frame
 			for(size_t i = 0; i < readFrames; i++) {
 				// Applies the volume to all channels the sound might have
-				for(uint8_t channels = 0; channels < audioInfo->getChannels(); channels++) {
+				for(uint8_t channels = 0; channels < audioInfo->getChannels();
+					channels++) {
 					float frame = *output;
 
 					// In case there's 3D audio, calculates 3D audio
@@ -87,29 +98,31 @@ namespace AuroraFW {
 							frame *= (0.5f * panning + 0.5f);
 					}
 
-					frame *= audioStream->volume * AudioBackend::getInstance().globalVolume;
+					frame *= audioStream->volume
+					* AudioBackend::getInstance().globalVolume;
 
 					*output++ = frame;
 				}
 			}
 
 			// If the read frames didn't fill the buffer to read, it reached EOF
-			if(readFrames < framesPerBuffer && audioStream->audioPlayMode == AudioPlayMode::Once)
+			if(readFrames < framesPerBuffer && audioStream->audioPlayMode
+				== AudioPlayMode::Once)
 				return paComplete;
 
 			return paContinue;
 		}
 
 		// debugCallBack
-		int debugCallback(const void *inputBuffer, void *outputBuffer,
-						size_t framesPerBuffer, const PaStreamCallbackTimeInfo *timeInfo,
-						PaStreamCallbackFlags statusFlags, void *userData)
+		int debugCallback(const void* inputBuffer, void* outputBuffer,
+						size_t framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
+						PaStreamCallbackFlags statusFlags, void* userData)
 		{
 
 			uint8_t left_ear = 0;
 			uint8_t right_ear = 0;
 
-			uint8_t *output = (uint8_t*)outputBuffer;
+			uint8_t* output = (uint8_t*)outputBuffer;
 
 			for(unsigned int i = 0; i < framesPerBuffer; i++) {
 				*output++ = left_ear;
@@ -147,8 +160,10 @@ namespace AuroraFW {
 		}
 
 		AudioSource::AudioSource(const AudioSource& audioSource)
-			: falloutType(audioSource.falloutType), _position(audioSource._position),
-				_medDistance(audioSource._medDistance), _maxDistance(audioSource._maxDistance)
+			: falloutType(audioSource.falloutType),
+			_position(audioSource._position),
+			_medDistance(audioSource._medDistance),
+			_maxDistance(audioSource._maxDistance)
 		{
 			calculateValues();
 		}
@@ -206,13 +221,18 @@ namespace AuroraFW {
 		{
 			Math::Vector3D listenerPos = AudioListener::getInstance().position;
 			Math::Vector3D listenerDir = AudioListener::getInstance().direction;
-			// TODO: Right now it's hardcoded because the camera, under normal circunstances,
-			//	doesn't "tilt". Make less dirty later
+
+			#pragma message("TODO: Values are hardcoded (see info on code)")
+			// TODO: Right now it's hardcoded because the camera, under normal
+			// circunstances, doesn't \"tilt\". Make less dirty later
 			Math::Vector3D listenerUp = Math::Vector3D(0, 1, 0);
-			// FIXME: The method to obtain the perpendicular to both dir and lookUp didn't use matrixes
-			// , because I am inexperienced on it. This is where I got the formula:
+
+			#pragma message("FIXME: Not using matrixes (see info on code)")
+			// FIXME: The method to obtain the perpendicular to both dir and
+			// lookUp didn't use matrixes , because I am inexperienced on it.
+			// This is where I got the formula:
 			// https://math.stackexchange.com/questions/501949/determining-a-perpendicular-vector-to-two-given-vectors
-			// however, this is dirty and should be cleaned up
+			// however, this is dirty and should be cleaned up.)
 			float x = listenerDir.y * listenerUp.z - listenerDir.z * listenerUp.y;
 			float y = listenerDir.z * listenerUp.x - listenerDir.x * listenerUp.z;
 			float z = listenerDir.x * listenerUp.y - listenerDir.y * listenerUp.x;
@@ -220,7 +240,8 @@ namespace AuroraFW {
 			Math::Vector3D cross = Math::Vector3D(x, y, z);
 			cross.normalize();
 
-			// Makes a copy of position, since it needs to be manipulated to calculate the panning
+			// Makes a copy of position, since it needs to be manipulated
+			// to calculate the panning
 			Math::Vector3D sourcePos = _position;
 			sourcePos -= listenerPos;
 
@@ -230,7 +251,8 @@ namespace AuroraFW {
 		void AudioSource::_calculateStrength()
 		{
 			#pragma message ("TODO: Need to be implemented")
-			float distance = Math::abs(_position.distanceToPoint(AudioListener::getInstance().position));
+			float distance = Math::abs(_position.distanceToPoint
+			(AudioListener::getInstance().position));
 		}
 
 		// AudioOStream
@@ -245,14 +267,15 @@ namespace AuroraFW {
 				device.getDefaultSampleRate(), 256, debugCallback, NULL));
 		}
 
-		AudioOStream::AudioOStream(const char *path, AudioSource *audioSource, bool buffered)
+		AudioOStream::AudioOStream(const char* path, AudioSource* audioSource, bool buffered)
 			: audioInfo(), _audioSource(audioSource)
 		{
 			audioInfo._sndFile = sf_open(path, SFM_READ, audioInfo._sndInfo);
 
 			// If the audio should be buffered, do so
 			if(buffered) {
-				AuroraFW::DebugManager::Log("Buffering the audio... (Total frames: ", audioInfo.getFrames() * audioInfo.getChannels(), ")");
+				AuroraFW::DebugManager::Log("Buffering the audio..."
+				"(Total frames: ", audioInfo.getFrames() * audioInfo.getChannels(), ")");
 				_buffer = AFW_NEW float[audioInfo.getFrames() * audioInfo.getChannels()];
 				sf_readf_float(audioInfo._sndFile, _buffer, audioInfo.getFrames());
 				AuroraFW::DebugManager::Log("Buffering complete.");
@@ -265,8 +288,9 @@ namespace AuroraFW {
 			AudioDevice device;
 
 			// Opens the audio stream
-			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, audioInfo.getChannels(), paFloat32,
-				device.getDefaultSampleRate(), paFramesPerBufferUnspecified, audioOutputCallback, this));
+			catchPAProblem(Pa_OpenDefaultStream(&_paStream, 0, audioInfo.getChannels(),
+			paFloat32, device.getDefaultSampleRate(),
+			paFramesPerBufferUnspecified, audioOutputCallback, this));
 		}
 
 		AudioOStream::~AudioOStream()
@@ -315,7 +339,7 @@ namespace AuroraFW {
 
 		void AudioOStream::setStreamPos(unsigned int pos)
 		{
-			// TODO: Implement
+			#pragma message ("TODO: Need to be implemented")
 		}
 
 		void AudioOStream::setStreamPosFrame(unsigned int pos)

@@ -21,17 +21,17 @@ title Structure of AudioUtils classes
 class AudioInfo {
 	.. Constructor/Destructor ..
 	+ AudioInfo()
-	+ AudioInfo(AudioOStream )
+	+ AudioInfo(SF_INFO* sndInfo = new SF_INFO(), SNDFILE* sndFile = nullptr)
 	+ ~AudioInfo()
 
 	.. Audio Metadata Functions ..
-	+ const unsigned int getSampleRate() const
-	+ const unsigned long getFrames() const
-	+ const int getChannels() const
-	+ const int getFormat() const
+	+ int getSampleRate() const
+	+ sf_count_t getFrames() const
+	+ int getChannels() const
+	+ int getFormat() const
 
-	+ void setSampleRate(const unsigned int sampleRate)
-	+ void setFrames(const unsigned long frames)
+	+ void setSampleRate(const int sampleRate)
+	+ void setFrames(const sf_count_t frames)
 	+ void setChannels(const int channels)
 	+ void setFormat(cont int format)
 

@@ -92,8 +92,8 @@ namespace AuroraFW {
 				static AudioListener *_instance;
 				AudioListener() {};
 
-				static void start();
-				static void stop();
+				static void _start();
+				static void _stop();
 			public:
 				friend struct AudioBackend;
 
@@ -110,15 +110,15 @@ namespace AuroraFW {
 			static AudioBackend *_instance;
 			AudioBackend();
 
-			const AudioDevice* getDevices();
+			const AudioDevice* _getDevices();
 
-			int calcNumDevices();
-			int calcNumOutputDevices();
-			int calcNumInputDevices();
+			int _calcNumOutputDevices();
+			int _calcNumDevices();
+			int _calcNumInputDevices();
 
-			int numDevices;
-			int numOutputDevices;
-			int numInputDevices;
+			int _numDevices;
+			int _numOutputDevices;
+			int _numInputDevices;
 
 		public:
 			~AudioBackend() {};
@@ -156,17 +156,17 @@ namespace AuroraFW {
 
 		inline int AudioBackend::getNumDevices()
 		{
-			return numDevices;
+			return _numDevices;
 		}
 
 		inline int AudioBackend::getNumOutputDevices()
 		{
-			return numOutputDevices;
+			return _numOutputDevices;
 		}
 		
 		inline int AudioBackend::getNumInputDevices()
 		{
-			return numInputDevices;
+			return _numInputDevices;
 		}
 	}
 }

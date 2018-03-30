@@ -19,12 +19,13 @@ class name <<(E,firebrick) exception>> #FCC {
 title Structure of AudioBackend classes
 
 exception(PAErrorException, PaError)
+exception(SNDFILEErrorException, int)
 exception(AudioNotInitializedException)
 
 class AudioDevice {
 	.. Constructor/Destructor ..
 	+ AudioDevice()
-	+ AudioDevice(const PaDeviceInfo* deviceID)
+	+ AudioDevice(const PaDeviceInfo* deviceInfo)
 	+ ~AudioDevice()
 
 	.. Device Info Functions..
@@ -76,6 +77,9 @@ class AudioBackend << (S,#FF7700) Singleton >> {
 	+ int getNumDevices()
 	+ int getNumOutputDevices()
 	+ int getNumInputDevices()
+
+	--
+	+ float globalVolume = 1
 }
 
 @enduml

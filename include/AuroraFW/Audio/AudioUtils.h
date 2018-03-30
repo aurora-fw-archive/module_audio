@@ -40,7 +40,8 @@ namespace AuroraFW {
 		struct AFW_API AudioInfo {
 			friend struct AudioOStream;
 			friend struct AudioIStream;
-			friend int audioOutputCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+			friend int audioOutputCallback(const void* , void* , size_t ,
+			const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 			AudioInfo(SF_INFO* = new SF_INFO(), SNDFILE* = nullptr);
 			~AudioInfo();

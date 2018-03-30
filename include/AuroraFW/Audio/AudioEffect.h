@@ -16,46 +16,37 @@
 ** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
 ****************************************************************************/
 
-#ifndef AURORAFW_AUDIO_AUDIO_INPUT_H
-#define AURORAFW_AUDIO_AUDIO_INPUT_H
+#ifndef AURORAFW_AUDIO_AUDIOEFFECT_H
+#define AURORAFW_AUDIO_AUDIOEFFECT_H
 
 // AuroraFW
 #include <AuroraFW/Global.h>
-#include <AuroraFW/Audio/AudioUtils.h>
-#include <AuroraFW/Audio/AudioBackend.h>
+#if(AFW_TARGET_PRAGMA_ONCE_SUPPORT)
+	#pragma once
+#endif
+
+#include <AuroraFW/Internal/Config.h>
+
+#include <AuroraFW/CoreLib/Allocator.h>
 
 namespace AuroraFW {
 	namespace AudioManager {
-		struct AFW_API AudioIStream {
-			friend int audioInputCallback(const void* , void* , size_t ,
-			const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags, void* );
+		struct AFW_API AudioEffect {
+			virtual float* process(float* , size_t ) = 0;
+		};
 
-			AudioIStream(const char* , AudioInfo* , int );
-			~AudioIStream();
+		struct AFW_API ReverbEffect : public AudioEffect {
 
-			void record();
-			void pause();
-			void stop();
+		};
 
-			bool isRecording();
-			bool isPaused();
-			bool isStopped();
-			bool isBufferFull();
+		struct AFW_API LowPassEffect : public AudioEffect {
 
-			void clearBuffer();
-			void clearBuffer(unsigned int start, unsigned int finish);
+		};
 
-			bool save();
+		struct AFW_API HighPassEffect : public AudioEffect {
 
-			const char* path;
-			AudioInfo* info;
-			float* buffer;	// TODO - Check if this needs to be private
-			const int bufferSize;
-		private:
-			PaStream* _paStream;
-			unsigned int _streamPosFrame = 0;
 		};
 	}
 }
 
-#endif // AURORAFW_AUDIO_AUDIO_INPUT_H
+#endif	// AURORAFW_AUDIO_AUDIOEFFECT_H

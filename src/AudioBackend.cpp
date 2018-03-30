@@ -22,9 +22,10 @@ namespace AuroraFW {
 	namespace AudioManager {
 		// PAErrorException
 		PAErrorException::PAErrorException(const PaError& paError)
-			: _paError(std::string("PortAudio error: " + std::string(Pa_GetErrorText(paError))))
+			: _paError(std::string("PortAudio error: "
+			+ std::string(Pa_GetErrorText(paError))))
 		{}
-		
+
 		const char* PAErrorException::what() const throw()
 		{
 			return _paError.c_str();
@@ -32,7 +33,8 @@ namespace AuroraFW {
 
 		// SNDFILEErrorException
 		SNDFILEErrorException::SNDFILEErrorException(const int& error)
-			: _sndFileError(std::string("SNDFILE error: " + std::string(sf_error_number(error))))
+			: _sndFileError(std::string("SNDFILE error: "
+			+ std::string(sf_error_number(error))))
 		{}
 
 		const char* SNDFILEErrorException::what() const throw()
@@ -49,12 +51,12 @@ namespace AuroraFW {
 		// AudioListener
 		AudioListener* AudioListener::_instance = nullptr;
 
-		void AudioListener::start()
+		void AudioListener::_start()
 		{
 			_instance = new AudioListener();
 		}
 
-		void AudioListener::stop()
+		void AudioListener::_stop()
 		{
 			delete _instance;
 		}
@@ -70,7 +72,7 @@ namespace AuroraFW {
 		AudioDevice::AudioDevice()
 			: _deviceInfo(Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice())) {}
 
-		AudioDevice::AudioDevice(const PaDeviceInfo *deviceInfo)
+		AudioDevice::AudioDevice(const PaDeviceInfo* deviceInfo)
 			: _deviceInfo(deviceInfo) {}
 
 		const char* AudioDevice::getName() const
@@ -145,31 +147,32 @@ namespace AuroraFW {
 			catchPAProblem(Pa_Initialize());
 
 			// Gets number of devices
-			numDevices = calcNumDevices();
-			numOutputDevices = calcNumOutputDevices();
-			numInputDevices = calcNumInputDevices();
+			_numDevices = _calcNumDevices();
+			_numOutputDevices = _calcNumOutputDevices();
+			_numInputDevices = _calcNumInputDevices();
 
 			// Prints verbose
-			AuroraFW::DebugManager::Log("AudioBackend initialized. Num. of available audio devices: ", numDevices,
-								"(", numOutputDevices, " output devices, ",
-								numInputDevices, " input devices.)");
+			AuroraFW::DebugManager::Log("AudioBackend initialized. Num. of"
+			"available audio devices: ", _numDevices, "(",
+			_numOutputDevices, " output devices, ",
+			_numInputDevices, " input devices.)");
 		}
 
-		const AudioDevice* AudioBackend::getDevices()
+		const AudioDevice* AudioBackend::_getDevices()
 		{
 			int numDevices = getNumDevices();
-			AudioDevice *audioDevices = new AudioDevice[numDevices];
+			AudioDevice* audioDevices = new AudioDevice[numDevices];
 			for(int i = 0; i < numDevices; i++) {
 				audioDevices[i] = AudioDevice(Pa_GetDeviceInfo(i));
 			}
-			
+
 			return const_cast<const AudioDevice*>(audioDevices);
 		}
 
-		int AudioBackend::calcNumOutputDevices()
+		int AudioBackend::_calcNumOutputDevices()
 		{
 			int numDevices = getNumDevices();
-			const AudioDevice *audioDevices = getDevices();
+			const AudioDevice* audioDevices = _getDevices();
 			for(int i = 0; i < getNumDevices(); i++) {
 				if(!audioDevices[i].isOutputDevice())
 					numDevices--;
@@ -180,10 +183,10 @@ namespace AuroraFW {
 			return numDevices;
 		}
 
-		int AudioBackend::calcNumInputDevices()
+		int AudioBackend::_calcNumInputDevices()
 		{
 			int numDevices = getNumDevices();
-			const AudioDevice *audioDevices = getDevices();
+			const AudioDevice* audioDevices = _getDevices();
 			for(int i = 0; i < getNumDevices(); i++) {
 				if(!audioDevices[i].isInputDevice())
 					numDevices--;
@@ -194,7 +197,7 @@ namespace AuroraFW {
 			return numDevices;
 		}
 
-		// TODO: Subject to change, plan changes well and revisit later
+		#pragma message("TODO: Subject to change, plan changes well and revisit later")
 		void AudioBackend::start()
 		{
 			// Starts the instance if it's not initialized yet
@@ -202,9 +205,10 @@ namespace AuroraFW {
 				_instance = new AudioBackend();
 
 				// Calls AudioListener's private start method
-				AudioListener::start();
+				AudioListener::_start();
 			} else {
-				CLI::Log(CLI::Warning, "The AudioBackend was already initialized. This method shouldn't be called twice!");
+				CLI::Log(CLI::Warning, "The AudioBackend was already initialized. "
+				"This method shouldn't be called twice!");
 			}
 		}
 
@@ -229,25 +233,26 @@ namespace AuroraFW {
 				_instance = nullptr;
 
 				// Terminates AudioListener
-				AudioListener::stop();
+				AudioListener::_stop();
 
 				// Prints verbose
 				AuroraFW::DebugManager::Log("AudioBackend was terminated.");
 			} else {
-				CLI::Log(CLI::Warning, "The AudioBackend was already terminated. This method shouldn't be called twice!");
+				CLI::Log(CLI::Warning, "The AudioBackend was already terminated. "
+				"This method shouldn't be called twice!");
 			}
 		}
 
 		const AudioDevice* AudioBackend::getAllDevices()
 		{
-			return getDevices();
+			return _getDevices();
 		}
 
 		const AudioDevice* AudioBackend::getOutputDevices()
 		{
-			AudioDevice* audioDevices = new AudioDevice[numOutputDevices];
+			AudioDevice* audioDevices = new AudioDevice[_numOutputDevices];
 			int trueIndex = 0;
-			for(int i = 0; i < numDevices; i++) {
+			for(int i = 0; i < _numDevices; i++) {
 				AudioDevice audioDevice(Pa_GetDeviceInfo(i));
 				if(audioDevice.getMaxOutputChannels() > 0) {
 					audioDevices[trueIndex] = audioDevice;
@@ -260,9 +265,9 @@ namespace AuroraFW {
 
 		const AudioDevice* AudioBackend::getInputDevices()
 		{
-			AudioDevice* audioDevices = new AudioDevice[numInputDevices];
+			AudioDevice* audioDevices = new AudioDevice[_numInputDevices];
 			int trueIndex = 0;
-			for(int i = 0; i < numDevices; i++) {
+			for(int i = 0; i < _numDevices; i++) {
 				AudioDevice audioDevice(Pa_GetDeviceInfo(i));
 				if(audioDevice.getMaxInputChannels() > 0) {
 					audioDevices[trueIndex] = audioDevice;
@@ -273,7 +278,7 @@ namespace AuroraFW {
 			return audioDevices;
 		}
 
-		int AudioBackend::calcNumDevices()
+		int AudioBackend::_calcNumDevices()
 		{
 			return Pa_GetDeviceCount();
 		}

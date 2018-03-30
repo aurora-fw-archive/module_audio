@@ -31,7 +31,9 @@ namespace AuroraFW {
 
 			for(size_t f = 0; f < framesPerBuffer; f++) {
 				for(uint8_t c = 0; c < info->getChannels(); c++) {
-					stream->buffer[stream->_streamPosFrame * info->getChannels() + (f * info->getChannels() + c)] = input[f * info->getChannels() + c];
+					stream->buffer[stream->_streamPosFrame * info->getChannels()
+					+ (f * info->getChannels() + c)]
+					= input[f * info->getChannels() + c];
 
 					if(stream->_streamPosFrame + f == stream->bufferSize) {
 						stream->_streamPosFrame = stream->bufferSize;
@@ -54,7 +56,8 @@ namespace AuroraFW {
 			info->_sndFile = sf_open(path, SFM_WRITE, info->_sndInfo);
 
 			catchPAProblem(Pa_OpenDefaultStream(&_paStream, info->getChannels(), 0, paFloat32,
-				info->getSampleRate(), paFramesPerBufferUnspecified, audioInputCallback, this));
+				info->getSampleRate(), paFramesPerBufferUnspecified,
+				audioInputCallback, this));
 		}
 
 		AudioIStream::~AudioIStream()
@@ -100,17 +103,17 @@ namespace AuroraFW {
 
 		bool AudioIStream::isBufferFull()
 		{
-
+			#pragma message ("TODO: Need to be implemented")
 		}
 
 		void AudioIStream::clearBuffer()
 		{
-
+			#pragma message ("TODO: Need to be implemented")
 		}
 
 		void AudioIStream::clearBuffer(unsigned int start, unsigned int end)
 		{
-
+			#pragma message ("TODO: Need to be implemented")
 		}
 
 		bool AudioIStream::save()

@@ -82,7 +82,8 @@ namespace AuroraFW {
 
 		struct AFW_API AudioOStream {
 			friend struct AudioSource;
-			friend int audioOutputCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+			friend int audioOutputCallback(const void* , void* , size_t ,
+			const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 			AudioOStream();
 			AudioOStream(const char* , AudioSource* = nullptr, bool = false);
@@ -113,16 +114,17 @@ namespace AuroraFW {
 			float pitch = 1;
 
 		private:
-			PaStream *_paStream;
+			PaStream* _paStream;
 
 			float* _buffer = nullptr;
 			unsigned int _streamPosFrame = 0;
 			uint8_t _loops = 0;
 			
-			AudioSource *_audioSource;
+			AudioSource* _audioSource;
 		};
 		
-		int debugCallback(const void* , void* , size_t , const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
+		int debugCallback(const void* , void* , size_t ,
+		const PaStreamCallbackTimeInfo* , PaStreamCallbackFlags , void* );
 
 		// Inline definitions
 		inline float AudioOStream::getNumLoops()

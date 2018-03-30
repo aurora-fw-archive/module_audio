@@ -20,6 +20,7 @@ title Structure of Audio classes
 
 class AudioOStream {
 	.. Constructor/Destructor ..
+	+ AudioOStream()
 	+ AudioOStream(const char *path, AudioSource*)
 	+ ~AudioOStream()
 
@@ -39,9 +40,11 @@ class AudioOStream {
 	+ AudioSource* getAudioSource()
 	+ void setAudioSource(const AudioSource& audioSource)
 
-	+ const float getNumLoops()
+	+ float getNumLoops()
+	+ float getCpuLoad()
 	--
-	+ AudioPlayMode AudioPlayMode
+	+ AudioPlayMode audioPlayMode
+	+ AudioInfo audioInfo
 
 	+ float volume = 1
 	+ float pitch = 1
@@ -49,7 +52,7 @@ class AudioOStream {
 
 class AudioIStream {
 	.. Constructor/Destructor ..
-	+ AudioIStream(const char *path, unsigned int samplerate, unsigned int frames, uint_8t channels)
+	+ AudioIStream(const char *path, AudioInfo *audioInfo, int bufferSize)
 	+ ~AudioIStream()
 
 	.. Recording Functions ..
@@ -69,7 +72,9 @@ class AudioIStream {
 	+ bool save()
 	--
 	+ const char* path
-	+ float* buffer = new float[frames]
+	+ AudioInfo *info
+	+ float* buffer
+	+ const int bufferSize
 }
 
 class AudioSource {
@@ -92,6 +97,9 @@ class AudioSource {
 	+ void calculateValues()
 	+ const float getPanning()
 	+ const float getStrength()
+
+	--
+	+ AudioFalloutType falloutType
 }
 
 enum AudioFallout {
@@ -102,13 +110,6 @@ enum AudioFallout {
 enum AudioPlayMode {
 	+ Once
 	+ Loop
-}
-
-enum AudioStatus {
-	+ Play
-	+ Pause
-	+ Stop
-	+ CallbackStop
 }
 
 exception(AudioFileNotFoundException, string)
