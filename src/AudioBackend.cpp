@@ -152,8 +152,8 @@ namespace AuroraFW {
 			_numInputDevices = _calcNumInputDevices();
 
 			// Prints verbose
-			AuroraFW::DebugManager::Log("AudioBackend initialized. Num. of"
-			"available audio devices: ", _numDevices, "(",
+			AuroraFW::DebugManager::Log("AudioBackend initialized. Num. of "
+			"available audio devices: ", _numDevices, " (",
 			_numOutputDevices, " output devices, ",
 			_numInputDevices, " input devices.)");
 		}
