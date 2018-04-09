@@ -31,7 +31,6 @@
 #include <AuroraFW/Audio/AudioBackend.h>
 #include <AuroraFW/Audio/AudioUtils.h>
 #include <AuroraFW/Math/Algorithm.h>
-#include <AuroraFW/CoreLib/Allocator.h>
 
 namespace AuroraFW {
 	namespace AudioManager {

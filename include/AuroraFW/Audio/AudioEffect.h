@@ -27,8 +27,6 @@
 
 #include <AuroraFW/Internal/Config.h>
 
-#include <AuroraFW/CoreLib/Allocator.h>
-
 namespace AuroraFW {
 	namespace AudioManager {
 		struct AFW_API AudioEffect {
